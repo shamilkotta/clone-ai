@@ -5,6 +5,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { CircleStop, Command, Paperclip, SendIcon, XIcon } from "lucide-react";
 import { v4 as uuid } from "uuid";
 import { useAuth } from "@clerk/nextjs";
+import { useParams } from "next/navigation";
 
 import useAutoResizeTextarea from "@/hooks/use-auto-resize";
 import { cn } from "@/lib/utils";
@@ -19,8 +20,15 @@ const ChatInput = () => {
     maxHeight: 200,
   });
   const [inputFocused, setInputFocused] = useState(false);
-  const { handleSubmit, handleInputChange, input, status, stop, messages } =
-    useChatContext();
+  const {
+    handleSubmit,
+    handleInputChange,
+    input,
+    status,
+    stop,
+    messages,
+    threadId,
+  } = useChatContext();
   const { isSignedIn } = useAuth();
 
   useEffect(() => {
@@ -42,12 +50,23 @@ const ChatInput = () => {
   };
 
   const handleSubmitForm = () => {
-    if (isSignedIn) {
-      const id = uuid();
-      console.log("id: ", id);
+    let id = threadId;
+    if (isSignedIn && !id) {
+      id = uuid();
       window.history.pushState({}, "", "/chat/" + id);
     }
-    handleSubmit?.();
+    handleSubmit?.(
+      {},
+      {
+        body: {
+          model: "gemini-2.0-flash-exp", // TODO
+          threadId: id,
+          userInfo: {
+            timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+          },
+        },
+      },
+    );
     adjustHeight(true);
   };
 

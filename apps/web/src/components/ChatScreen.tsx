@@ -10,13 +10,14 @@ import CodeHighlight from "./CodeHighlight";
 import { useChatContext } from "@/context/Chat";
 import Greeting from "./greeting";
 import { cn } from "@/lib/utils";
+import TypingDots from "./ui/typing-dots";
 
 type Props = {
   suggestions?: any;
 };
 
 const ChatScreen = ({ suggestions }: Props) => {
-  const { messages } = useChatContext();
+  const { messages, status } = useChatContext();
 
   return (
     <div
@@ -70,11 +71,13 @@ const ChatScreen = ({ suggestions }: Props) => {
                             {part.text}
                           </Markdown>
                         );
+                      // TODO: mange reasoning
                     }
                   })}
                 </div>
               ),
             )}
+            {status == "submitted" && <TypingDots />}
           </div>
         )}
       </div>

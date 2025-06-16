@@ -6,7 +6,7 @@ function TypingDots() {
       {[1, 2, 3].map((dot) => (
         <motion.div
           key={dot}
-          className="w-1.5 h-1.5 bg-white/90 rounded-full mx-0.5"
+          className="w-1.5 h-1.5 bg-neutral-900/90 dark:bg-white/90 rounded-full mx-0.5"
           initial={{ opacity: 0.3 }}
           animate={{
             opacity: [0.3, 0.9, 0.3],

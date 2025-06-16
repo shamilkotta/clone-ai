@@ -1,5 +1,4 @@
 import { currentUser } from "@clerk/nextjs/server";
-import { ChevronsUpDown, User } from "lucide-react";
 
 import {
   Sidebar,
@@ -8,7 +7,6 @@ import {
   SidebarGroup,
   SidebarHeader,
 } from "@/components/ui/sidebar";
-import Image from "next/image";
 import { NavUser } from "./nav-user";
 
 export async function AppSidebar() {

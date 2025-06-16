@@ -7,7 +7,9 @@ import {
   CodeXmlIcon,
   BookOpenTextIcon,
 } from "lucide-react";
+import { useAuth, useUser } from "@clerk/nextjs";
 import { motion } from "framer-motion";
+
 import Suggestions from "./Suggestions";
 import { useChatContext } from "@/context/Chat";
 
@@ -48,6 +50,8 @@ const commandSuggestions: CommandSuggestion[] = [
 const Greeting = (props: Props) => {
   const [currentSelected, setCurrentSelected] = useState("Create");
   const { messages } = useChatContext();
+  const { user } = useUser();
+  const username = user?.lastName || user?.firstName || user?.fullName;
 
   if (messages && messages?.length > 0) return null;
 
@@ -66,7 +70,7 @@ const Greeting = (props: Props) => {
           className="inline-block"
         >
           <h1 className="pb-1  font-bold tracking-tight text-transparent bg-clip-text text-4xl dark:bg-white/90 bg-neutral-900">
-            Good To See You!
+            Good To See You{username ? `, ${username}` : ""}!
           </h1>
           <h1 className="pb-1  font-bold tracking-tight text-transparent bg-clip-text bg-gradient-to-r text-4xl from-neutral-900 to-neutral-500 dark:from-white/90 dark:to-white/40">
             How can I help you?
