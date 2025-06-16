@@ -1,19 +1,19 @@
 import React, { Suspense } from "react";
+import { redirect } from "next/navigation";
 
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
-import ChatInput from "@/components/ui/chat-input";
 import ChatContext from "@/context/Chat";
 import ChatScreen from "@/components/ChatScreen";
-import Bg from "@/components/Bg";
+import ChatInput from "@/components/ui/chat-input";
 import Toolbox from "@/components/Toolbox";
 
-const Chat = () => {
-  const querySuggestions = fetch(process.env.URL + "/api/suggestions", {
-    next: {
-      revalidate: 60 * 60 * 12,
-    },
-  }).then((res) => res.json());
+const Chat = async ({ params }: { params: Promise<{ id: string }> }) => {
+  const { id } = await params;
+
+  if (!id) {
+    redirect(`/`);
+  }
 
   return (
     <SidebarProvider defaultOpen={false}>
@@ -23,8 +23,7 @@ const Chat = () => {
       <ChatContext>
         <Toolbox />
         <main className="relative h-screen w-full flex flex-col justify-center items-center">
-          <Bg />
-          <ChatScreen suggestions={querySuggestions} />
+          <ChatScreen />
           <ChatInput />
         </main>
       </ChatContext>

@@ -1,0 +1,725 @@
+diff --git a/dist/chunk-RZ35JRPP.js b/dist/chunk-RZ35JRPP.js
+index 9a095b9034ebe4446c1057d1b6041cc881b16bf4..697fe38fa7f1b2e3ec0e92d8225a4150623a544e 100644
+--- a/dist/chunk-RZ35JRPP.js
++++ b/dist/chunk-RZ35JRPP.js
+@@ -10,7 +10,10 @@ function rehypeInlineCodeProperty() {
+   };
+ }
+ var isInlineCode = (node) => {
+-  const textContent = (node.children || []).filter((child) => child.type === "text").map((child) => child.value).join("");
++  const textContent = (node.children || [])
++    .filter((child) => child.type === "text")
++    .map((child) => child.value)
++    .join("");
+   return !textContent.includes("\n");
+ };
+ var throttleHighlighting = (performHighlight, timeoutControl, throttleMs) => {
+@@ -24,73 +27,99 @@ var throttleHighlighting = (performHighlight, timeoutControl, throttleMs) => {
+ };
+ 
+ // src/lib/hook.ts
+-import {
+-  useEffect,
+-  useMemo,
+-  useRef,
+-  useState
+-} from "react";
++import { useEffect, useMemo, useRef, useState } from "react";
+ import { dequal } from "dequal/lite";
+ import { jsx, jsxs, Fragment } from "react/jsx-runtime";
+ import { toJsxRuntime } from "hast-util-to-jsx-runtime";
+ 
+ // src/lib/resolvers.ts
+ var resolveLanguage = (lang, customLanguages) => {
+-  const normalizedCustomLangs = customLanguages ? Array.isArray(customLanguages) ? customLanguages : [customLanguages] : [];
+-  if (lang == null || typeof lang === "string" && !lang.trim()) {
++  const normalizedCustomLangs = customLanguages
++    ? Array.isArray(customLanguages)
++      ? customLanguages
++      : [customLanguages]
++    : [];
++  if (lang == null || (typeof lang === "string" && !lang.trim())) {
+     return {
+       languageId: "plaintext",
+       displayLanguageId: "plaintext",
+-      langsToLoad: void 0
++      langsToLoad: void 0,
+     };
+   }
+   if (typeof lang === "object") {
+     return {
+       languageId: lang.name,
+       displayLanguageId: lang.name || null,
+-      langsToLoad: lang
++      langsToLoad: lang,
+     };
+   }
+   const lowerLang = lang.toLowerCase();
+   const matches = (str) => str?.toLowerCase() === lowerLang;
+   const customMatch = normalizedCustomLangs.find(
+-    (cl) => matches(cl.name) || matches(cl.scopeName) || matches(cl.scopeName?.split(".").pop()) || cl.aliases?.some(matches) || cl.fileTypes?.some(matches)
++    (cl) =>
++      matches(cl.name) ||
++      matches(cl.scopeName) ||
++      matches(cl.scopeName?.split(".").pop()) ||
++      cl.aliases?.some(matches) ||
++      cl.fileTypes?.some(matches)
+   );
+   if (customMatch) {
+     return {
+       languageId: customMatch.name || lang,
+       displayLanguageId: lang,
+-      langsToLoad: customMatch
++      langsToLoad: customMatch,
+     };
+   }
+   return {
+     languageId: lang,
+     displayLanguageId: lang,
+-    langsToLoad: lang
++    langsToLoad: lang,
+   };
+ };
+ function resolveTheme(themeInput) {
+-  const isTextmateTheme = typeof themeInput === "object" && "tokenColors" in themeInput && Array.isArray(themeInput.tokenColors);
+-  const isMultiThemeConfig = typeof themeInput === "object" && themeInput !== null && !isTextmateTheme;
+-  const validMultiThemeObj = typeof themeInput === "object" && themeInput !== null && !isTextmateTheme && Object.entries(themeInput).some(
+-    ([key, value]) => key && value && key.trim() !== "" && value !== "" && (typeof value === "string" || isTextmateTheme)
+-  );
++  const isTextmateTheme =
++    typeof themeInput === "object" &&
++    "tokenColors" in themeInput &&
++    Array.isArray(themeInput.tokenColors);
++  const isMultiThemeConfig =
++    typeof themeInput === "object" && themeInput !== null && !isTextmateTheme;
++  const validMultiThemeObj =
++    typeof themeInput === "object" &&
++    themeInput !== null &&
++    !isTextmateTheme &&
++    Object.entries(themeInput).some(
++      ([key, value]) =>
++        key &&
++        value &&
++        key.trim() !== "" &&
++        value !== "" &&
++        (typeof value === "string" || isTextmateTheme)
++    );
+   if (isMultiThemeConfig) {
+-    const themeId = validMultiThemeObj ? `multi-${Object.values(themeInput).map(
+-      (theme) => (typeof theme === "string" ? theme : theme?.name) || "custom"
+-    ).sort().join("-")}` : "multi-default";
++    const themeId = validMultiThemeObj
++      ? `multi-${Object.values(themeInput)
++          .map(
++            (theme) =>
++              (typeof theme === "string" ? theme : theme?.name) || "custom"
++          )
++          .sort()
++          .join("-")}`
++      : "multi-default";
+     return {
+       isMultiTheme: true,
+       themeId,
+       multiTheme: validMultiThemeObj ? themeInput : null,
+-      themesToLoad: validMultiThemeObj ? Object.values(themeInput) : []
++      themesToLoad: validMultiThemeObj ? Object.values(themeInput) : [],
+     };
+   }
+   return {
+     isMultiTheme: false,
+-    themeId: typeof themeInput === "string" ? themeInput : themeInput?.name || "custom",
++    themeId:
++      typeof themeInput === "string"
++        ? themeInput
++        : themeInput?.name || "custom",
+     singleTheme: themeInput,
+-    themesToLoad: [themeInput]
++    themesToLoad: [themeInput],
+   };
+ }
+ 
+@@ -102,24 +131,26 @@ function lineNumbersTransformer(startLine = 1) {
+       this.addClassToHast(node, "has-line-numbers");
+       if (startLine !== 1) {
+         const existingStyle = node.properties?.style || "";
+-        const newStyle = existingStyle ? `${existingStyle}; --line-start: ${startLine}` : `--line-start: ${startLine}`;
++        const newStyle = existingStyle
++          ? `${existingStyle}; --line-start: ${startLine}`
++          : `--line-start: ${startLine}`;
+         node.properties = {
+           ...node.properties,
+-          style: newStyle
++          style: newStyle,
+         };
+       }
+     },
+     line(node) {
+       this.addClassToHast(node, "line-numbers");
+       return node;
+-    }
++    },
+   };
+ }
+ 
+ // src/lib/hook.ts
+ var DEFAULT_THEMES = {
+   light: "github-light",
+-  dark: "github-dark"
++  dark: "github-dark",
+ };
+ var useStableOptions = (value) => {
+   const ref = useRef(value);
+@@ -139,7 +170,13 @@ var useStableOptions = (value) => {
+   }
+   return [ref.current, revision.current];
+ };
+-var useShikiHighlighter = (code, lang, themeInput, createHighlighter, options = {}) => {
++var useShikiHighlighter = (
++  code,
++  lang,
++  themeInput,
++  createHighlighter,
++  options = {}
++) => {
+   const [highlightedCode, setHighlightedCode] = useState(null);
+   const [stableLang, langRev] = useStableOptions(lang);
+   const [stableTheme, themeRev] = useStableOptions(themeInput);
+@@ -148,10 +185,11 @@ var useShikiHighlighter = (code, lang, themeInput, createHighlighter, options =
+     () => resolveLanguage(stableLang, stableOpts.customLanguages),
+     [stableLang, stableOpts.customLanguages]
+   );
+-  const { isMultiTheme, themeId, multiTheme, singleTheme, themesToLoad } = useMemo(() => resolveTheme(stableTheme), [stableTheme]);
++  const { isMultiTheme, themeId, multiTheme, singleTheme, themesToLoad } =
++    useMemo(() => resolveTheme(stableTheme), [stableTheme]);
+   const timeoutControl = useRef({
+     nextAllowedTime: 0,
+-    timeoutId: void 0
++    timeoutId: void 0,
+   });
+   const shikiOptions = useMemo(() => {
+     const languageOption = { lang: languageId };
+@@ -162,13 +200,15 @@ var useShikiHighlighter = (code, lang, themeInput, createHighlighter, options =
+       startingLineNumber,
+       ...restOptions
+     } = stableOpts;
+-    const themeOptions = isMultiTheme ? {
+-      themes: multiTheme || DEFAULT_THEMES,
+-      defaultColor,
+-      cssVariablePrefix
+-    } : {
+-      theme: singleTheme || DEFAULT_THEMES.dark
+-    };
++    const themeOptions = isMultiTheme
++      ? {
++          themes: multiTheme || DEFAULT_THEMES,
++          defaultColor,
++          cssVariablePrefix,
++        }
++      : {
++          theme: singleTheme || DEFAULT_THEMES.dark,
++        };
+     const transformers = restOptions.transformers || [];
+     if (showLineNumbers) {
+       transformers.push(lineNumbersTransformer(startingLineNumber));
+@@ -177,19 +217,20 @@ var useShikiHighlighter = (code, lang, themeInput, createHighlighter, options =
+       ...languageOption,
+       ...themeOptions,
+       ...restOptions,
+-      transformers
++      transformers,
+     };
+   }, [languageId, themeId, langRev, themeRev, optsRev]);
+   useEffect(() => {
+     let isMounted = true;
+     const highlightCode = async () => {
+       if (!languageId) return;
+-      const highlighter = stableOpts.highlighter ? stableOpts.highlighter : await createHighlighter(
+-        langsToLoad,
+-        themesToLoad
+-      );
++      const highlighter = stableOpts.highlighter
++        ? stableOpts.highlighter
++        : await createHighlighter(langsToLoad, themesToLoad);
+       const loadedLanguages = highlighter.getLoadedLanguages();
+-      const langToUse = loadedLanguages.includes(languageId) ? languageId : "plaintext";
++      const langToUse = loadedLanguages.includes(languageId)
++        ? languageId
++        : "plaintext";
+       const finalOptions = { ...shikiOptions, lang: langToUse };
+       const hast = highlighter.codeToHast(code, finalOptions);
+       if (isMounted) {
+@@ -212,7 +253,7 @@ var useShikiHighlighter = (code, lang, themeInput, createHighlighter, options =
+     stableOpts.delay,
+     stableOpts.highlighter,
+     langsToLoad,
+-    themesToLoad
++    themesToLoad,
+   ]);
+   return highlightedCode;
+ };
+@@ -240,7 +281,9 @@ function styleInject(css, { insertAt } = {}) {
+ }
+ 
+ // src/lib/styles.css
+-styleInject(".relative {\n  position: relative;\n}\n.defaultStyles pre {\n  overflow: auto;\n  border-radius: 0.5rem;\n  padding-left: 1.5rem;\n  padding-right: 1.5rem;\n  padding-top: 1.25rem;\n  padding-bottom: 1.25rem;\n}\n.languageLabel {\n  position: absolute;\n  right: 0.75rem;\n  top: 0.5rem;\n  font-family: monospace;\n  font-size: 0.75rem;\n  letter-spacing: -0.05em;\n  color: rgba(107, 114, 128, 0.85);\n}\n.line-numbers::before {\n  counter-increment: line-number;\n  content: counter(line-number);\n  display: inline-flex;\n  justify-content: flex-end;\n  align-items: flex-start;\n  box-sizing: content-box;\n  min-width: var(--line-numbers-width, 2ch);\n  padding-left: var(--line-numbers-padding-left, 2ch);\n  padding-right: var(--line-numbers-padding-right, 2ch);\n  color: var(--line-numbers-foreground, rgba(107, 114, 128, 0.6));\n  font-size: var(--line-numbers-font-size, inherit);\n  font-weight: var(--line-numbers-font-weight, inherit);\n  line-height: var(--line-numbers-line-height, inherit);\n  font-family: var(--line-numbers-font-family, inherit);\n  opacity: var(--line-numbers-opacity, 1);\n  user-select: none;\n  pointer-events: none;\n}\n.has-line-numbers {\n  counter-reset: line-number calc(var(--line-start, 1) - 1);\n  --line-numbers-foreground: rgba(107, 114, 128, 0.5);\n  --line-numbers-width: 2ch;\n  --line-numbers-padding-left: 0ch;\n  --line-numbers-padding-right: 2ch;\n  --line-numbers-font-size: inherit;\n  --line-numbers-font-weight: inherit;\n  --line-numbers-line-height: inherit;\n  --line-numbers-font-family: inherit;\n  --line-numbers-opacity: 1;\n}\n");
++styleInject(
++  ".relative {\n  position: relative;\n}\n.defaultStyles pre {\n  overflow: auto;\n  border-radius: 0.5rem;\n  padding-left: 1.5rem;\n  padding-right: 1.5rem;\n  padding-top: 1.25rem;\n  padding-bottom: 1.25rem;\n}\n.languageLabel {\n  position: absolute;\n  right: 0.75rem;\n  top: 0.5rem;\n  font-family: monospace;\n  font-size: 0.75rem;\n  letter-spacing: -0.05em;\n  color: rgba(107, 114, 128, 0.85);\n}\n.line-numbers::before {\n  counter-increment: line-number;\n  content: counter(line-number);\n  display: inline-flex;\n  justify-content: flex-end;\n  align-items: flex-start;\n  box-sizing: content-box;\n  min-width: var(--line-numbers-width, 2ch);\n  padding-left: var(--line-numbers-padding-left, 2ch);\n  padding-right: var(--line-numbers-padding-right, 2ch);\n  color: var(--line-numbers-foreground, rgba(107, 114, 128, 0.6));\n  font-size: var(--line-numbers-font-size, inherit);\n  font-weight: var(--line-numbers-font-weight, inherit);\n  line-height: var(--line-numbers-line-height, inherit);\n  font-family: var(--line-numbers-font-family, inherit);\n  opacity: var(--line-numbers-opacity, 1);\n  user-select: none;\n  pointer-events: none;\n}\n.has-line-numbers {\n  counter-reset: line-number calc(var(--line-start, 1) - 1);\n  --line-numbers-foreground: rgba(107, 114, 128, 0.5);\n  --line-numbers-width: 2ch;\n  --line-numbers-padding-left: 0ch;\n  --line-numbers-padding-right: 2ch;\n  --line-numbers-font-size: inherit;\n  --line-numbers-font-weight: inherit;\n  --line-numbers-line-height: inherit;\n  --line-numbers-font-family: inherit;\n  --line-numbers-opacity: 1;\n}\n"
++);
+ 
+ // src/lib/component.tsx
+ import { clsx } from "clsx";
+@@ -264,6 +307,7 @@ var createShikiHighlighterComponent = (useShikiHighlighterImpl) => {
+     children: code,
+     as: Element = "pre",
+     customLanguages,
++    copyComponent,
+     ...shikiOptions
+   }) => {
+     const options = {
+@@ -274,44 +318,38 @@ var createShikiHighlighterComponent = (useShikiHighlighterImpl) => {
+       cssVariablePrefix,
+       showLineNumbers,
+       startingLineNumber,
+-      ...shikiOptions
++      ...shikiOptions,
+     };
+-    const { displayLanguageId } = resolveLanguage(
+-      language,
+-      customLanguages
+-    );
++    const { displayLanguageId } = resolveLanguage(language, customLanguages);
+     const highlightedCode = useShikiHighlighterImpl(
+       code,
+       language,
+       theme,
+       options
+     );
+-    return /* @__PURE__ */ jsxs2(
+-      Element,
+-      {
+-        "data-testid": "shiki-container",
+-        className: clsx(
+-          "relative",
+-          "not-prose",
+-          addDefaultStyles && "defaultStyles",
+-          className
+-        ),
+-        style,
+-        id: "shiki-container",
+-        children: [
+-          showLanguage && displayLanguageId ? /* @__PURE__ */ jsx2(
+-            "span",
+-            {
++    return /* @__PURE__ */ jsxs2(Element, {
++      "data-testid": "shiki-container",
++      className: clsx(
++        "relative",
++        "not-prose",
++        addDefaultStyles && "defaultStyles",
++        className
++      ),
++      style,
++      id: "shiki-container",
++      children: [
++        showLanguage && displayLanguageId
++          ? /* @__PURE__ */ jsx2("span", {
+               className: clsx("languageLabel", langClassName),
+               style: langStyle,
+               id: "language-label",
+-              children: displayLanguageId
+-            }
+-          ) : null,
+-          highlightedCode
+-        ]
+-      }
+-    );
++              children: displayLanguageId,
++            })
++          : null,
++        copyComponent ? copyComponent : null,
++        highlightedCode,
++      ],
++    });
+   };
+ };
+ 
+@@ -319,6 +357,6 @@ export {
+   rehypeInlineCodeProperty,
+   isInlineCode,
+   useShikiHighlighter,
+-  createShikiHighlighterComponent
++  createShikiHighlighterComponent,
+ };
+ //# sourceMappingURL=chunk-RZ35JRPP.js.map
+diff --git a/dist/component-DU2-v6BV.d.ts b/dist/component-DU2-v6BV.d.ts
+index 42724929a380c7fff131c51c40ec7769df02cb87..c85e972ad92389ff5b65a9704700309a08c639e8 100644
+--- a/dist/component-DU2-v6BV.d.ts
++++ b/dist/component-DU2-v6BV.d.ts
+@@ -1,7 +1,17 @@
+-import { Highlighter, HighlighterCore, CodeOptionsMultipleThemes, BundledTheme, CodeToHastOptions, StringLiteralUnion, BundledLanguage, SpecialLanguage, ThemeRegistrationAny } from 'shiki';
+-import { ReactNode } from 'react';
+-import { LanguageRegistration as LanguageRegistration$1 } from 'shiki/core';
+-import { Element as Element$1 } from 'hast';
++import {
++  Highlighter,
++  HighlighterCore,
++  CodeOptionsMultipleThemes,
++  BundledTheme,
++  CodeToHastOptions,
++  StringLiteralUnion,
++  BundledLanguage,
++  SpecialLanguage,
++  ThemeRegistrationAny,
++} from "shiki";
++import { ReactNode } from "react";
++import { LanguageRegistration as LanguageRegistration$1 } from "shiki/core";
++import { Element as Element$1 } from "hast";
+ 
+ /**
+  * Attribution:
+@@ -9,25 +19,26 @@ import { Element as Element$1 } from 'hast';
+  *  https://github.com/expressive-code/expressive-code/blob/main/packages/%40expressive-code/plugin-shiki/src/languages.ts
+  */
+ 
+-type IShikiRawRepository = LanguageRegistration$1['repository'];
++type IShikiRawRepository = LanguageRegistration$1["repository"];
+ type IShikiRawRule = IShikiRawRepository[keyof IShikiRawRepository];
+-type ILocation = IShikiRawRepository['$vscodeTextmateLocation'];
++type ILocation = IShikiRawRepository["$vscodeTextmateLocation"];
+ interface ILocatable {
+-    readonly $vscodeTextmateLocation?: ILocation;
++  readonly $vscodeTextmateLocation?: ILocation;
+ }
+ interface IRawRepositoryMap {
+-    [name: string]: IRawRule;
++  [name: string]: IRawRule;
+ }
+ type IRawRepository = IRawRepositoryMap & ILocatable;
+ interface IRawCapturesMap {
+-    [captureId: string]: IRawRule;
++  [captureId: string]: IRawRule;
+ }
+ type IRawCaptures = IRawCapturesMap & ILocatable;
+-interface IRawRule extends Omit<IShikiRawRule, 'applyEndPatternLast' | 'captures' | 'patterns'> {
+-    readonly applyEndPatternLast?: boolean | number;
+-    readonly captures?: IRawCaptures;
+-    readonly comment?: string;
+-    readonly patterns?: IRawRule[];
++interface IRawRule
++  extends Omit<IShikiRawRule, "applyEndPatternLast" | "captures" | "patterns"> {
++  readonly applyEndPatternLast?: boolean | number;
++  readonly captures?: IRawCaptures;
++  readonly comment?: string;
++  readonly patterns?: IRawRule[];
+ }
+ /**
+  * A less strict version of Shiki's `LanguageRegistration` interface that aligns better with
+@@ -35,8 +46,9 @@ interface IRawRule extends Omit<IShikiRawRule, 'applyEndPatternLast' | 'captures
+  * of type errors that would occur when importing and adding external grammars,
+  * while still being supported by the language processing code.
+  */
+-interface LanguageRegistration extends Omit<LanguageRegistration$1, 'repository'> {
+-    repository?: IRawRepository;
++interface LanguageRegistration
++  extends Omit<LanguageRegistration$1, "repository"> {
++  repository?: IRawRepository;
+ }
+ 
+ /**
+@@ -47,7 +59,10 @@ type Element = Element$1;
+  * A Shiki BundledLanguage or a custom textmate grammar object
+  * @see https://shiki.style/languages
+  */
+-type Language = LanguageRegistration | StringLiteralUnion<BundledLanguage | SpecialLanguage> | undefined;
++type Language =
++  | LanguageRegistration
++  | StringLiteralUnion<BundledLanguage | SpecialLanguage>
++  | undefined;
+ /**
+  * A Shiki BundledTheme or a custom textmate theme object
+  * @see https://shiki.style/themes
+@@ -70,71 +85,81 @@ type Theme = ThemeRegistrationAny | StringLiteralUnion<BundledTheme>;
+  * @see https://shiki.style/guide/dual-themes
+  */
+ type Themes = {
+-    [key: string]: ThemeRegistrationAny | StringLiteralUnion<BundledTheme>;
++  [key: string]: ThemeRegistrationAny | StringLiteralUnion<BundledTheme>;
+ };
+ /**
+  * Configuration options specific to react-shiki
+  */
+ interface ReactShikiOptions {
+-    /**
+-     * Minimum time (in milliseconds) between highlight operations.
+-     * @default undefined (no throttling)
+-     */
+-    delay?: number;
+-    /**
+-     * Custom textmate grammars to be preloaded for highlighting.
+-     */
+-    customLanguages?: LanguageRegistration | LanguageRegistration[];
+-    /**
+-     * Custom Shiki highlighter instance to use instead of the default one.
+-     * Keeps bundle small by only importing specified languages/themes.
+-     * Can be either a Highlighter or HighlighterCore instance.
+-     *
+-     * @example
+-     * import {
+-     *   createHighlighterCore,
+-     *   createOnigurumaEngine,
+-     *   useShikiHighlighter
+-     * } from "react-shiki";
+-     *
+-     * const customHighlighter = await createHighlighterCore({
+-     *   themes: [
+-     *     import('@shikijs/themes/nord')
+-     *   ],
+-     *   langs: [
+-     *     import('@shikijs/langs/javascript'),
+-     *     import('@shikijs/langs/typescript')
+-     *   ],
+-     *   engine: createOnigurumaEngine(import('shiki/wasm'))
+-     * });
+-     *
+-     * const highlightedCode = useShikiHighlighter(code, language, theme, {
+-     *   highlighter: customHighlighter,
+-     * });
+-     */
+-    highlighter?: Highlighter | HighlighterCore;
+-    /**
+-     * Whether to show line numbers
+-     * @default false
+-     */
+-    showLineNumbers?: boolean;
+-    /**
+-     * Starting line number (when showLineNumbers is true)
+-     * @default 1
+-     */
+-    startingLineNumber?: number;
++  /**
++   * Minimum time (in milliseconds) between highlight operations.
++   * @default undefined (no throttling)
++   */
++  delay?: number;
++  /**
++   * Custom textmate grammars to be preloaded for highlighting.
++   */
++  customLanguages?: LanguageRegistration | LanguageRegistration[];
++  /**
++   * Custom Shiki highlighter instance to use instead of the default one.
++   * Keeps bundle small by only importing specified languages/themes.
++   * Can be either a Highlighter or HighlighterCore instance.
++   *
++   * @example
++   * import {
++   *   createHighlighterCore,
++   *   createOnigurumaEngine,
++   *   useShikiHighlighter
++   * } from "react-shiki";
++   *
++   * const customHighlighter = await createHighlighterCore({
++   *   themes: [
++   *     import('@shikijs/themes/nord')
++   *   ],
++   *   langs: [
++   *     import('@shikijs/langs/javascript'),
++   *     import('@shikijs/langs/typescript')
++   *   ],
++   *   engine: createOnigurumaEngine(import('shiki/wasm'))
++   * });
++   *
++   * const highlightedCode = useShikiHighlighter(code, language, theme, {
++   *   highlighter: customHighlighter,
++   * });
++   */
++  highlighter?: Highlighter | HighlighterCore;
++  /**
++   * Whether to show line numbers
++   * @default false
++   */
++  showLineNumbers?: boolean;
++  /**
++   * Starting line number (when showLineNumbers is true)
++   * @default 1
++   */
++  startingLineNumber?: number;
+ }
+ /**
+  * Configuration options for the syntax highlighter
+  * Extends CodeToHastOptions to allow passing any Shiki options directly
+  */
+-interface HighlighterOptions extends ReactShikiOptions, Pick<CodeOptionsMultipleThemes<BundledTheme>, 'defaultColor' | 'cssVariablePrefix'>, Omit<CodeToHastOptions, 'lang' | 'theme' | 'themes'> {
+-}
++interface HighlighterOptions
++  extends ReactShikiOptions,
++    Pick<
++      CodeOptionsMultipleThemes<BundledTheme>,
++      "defaultColor" | "cssVariablePrefix"
++    >,
++    Omit<CodeToHastOptions, "lang" | "theme" | "themes"> {}
+ /**
+  * Public API signature for the useShikiHighlighter hook.
+  * This ensures all entry points have consistent signatures.
+  */
+-type UseShikiHighlighter = (code: string, lang: Language, themeInput: Theme | Themes, options?: HighlighterOptions) => ReactNode;
++type UseShikiHighlighter = (
++  code: string,
++  lang: Language,
++  themeInput: Theme | Themes,
++  options?: HighlighterOptions
++) => ReactNode;
+ 
+ /**
+  * Rehype plugin to add an 'inline' property to <code> elements
+@@ -159,71 +184,85 @@ declare const isInlineCode: (node: Element) => boolean;
+  * Props for the ShikiHighlighter component
+  */
+ interface ShikiHighlighterProps extends HighlighterOptions {
+-    /**
+-     * The programming language for syntax highlighting
+-     * Supports custom textmate grammar objects in addition to Shiki's bundled languages
+-     * @see https://shiki.style/languages
+-     */
+-    language: Language;
+-    /**
+-     * The code to be highlighted
+-     */
+-    children: string;
+-    /**
+-     * The color theme or themes for syntax highlighting
+-     * Supports single, dual, or multiple themes
+-     * Supports custom textmate theme objects in addition to Shiki's bundled themes
+-     *
+-     * @example
+-     * theme='github-dark' // single theme
+-     * theme={{ light: 'github-light', dark: 'github-dark' }} // multi-theme
+-     *
+-     * @see https://shiki.style/themes
+-     */
+-    theme: Theme | Themes;
+-    /**
+-     * Controls the application of default styles to the generated code blocks
+-     *
+-     * Default styles include padding, overflow handling, border radius, language label styling, and font settings
+-     * @default true
+-     */
+-    addDefaultStyles?: boolean;
+-    /**
+-     * Add custom inline styles to the generated code block
+-     */
+-    style?: React.CSSProperties;
+-    /**
+-     * Add custom inline styles to the language label
+-     */
+-    langStyle?: React.CSSProperties;
+-    /**
+-     * Add custom CSS class names to the generated code block
+-     */
+-    className?: string;
+-    /**
+-     * Add custom CSS class names to the language label
+-     */
+-    langClassName?: string;
+-    /**
+-     * Whether to show the language label
+-     * @default true
+-     */
+-    showLanguage?: boolean;
+-    /**
+-     * Whether to show line numbers
+-     * @default false
+-     */
+-    showLineNumbers?: boolean;
+-    /**
+-     * Starting line number (when showLineNumbers is true)
+-     * @default 1
+-     */
+-    startingLineNumber?: number;
+-    /**
+-     * The HTML element that wraps the generated code block.
+-     * @default 'pre'
+-     */
+-    as?: React.ElementType;
++  /**
++   * The programming language for syntax highlighting
++   * Supports custom textmate grammar objects in addition to Shiki's bundled languages
++   * @see https://shiki.style/languages
++   */
++  language: Language;
++  /**
++   * The code to be highlighted
++   */
++  children: string;
++  /**
++   * The color theme or themes for syntax highlighting
++   * Supports single, dual, or multiple themes
++   * Supports custom textmate theme objects in addition to Shiki's bundled themes
++   *
++   * @example
++   * theme='github-dark' // single theme
++   * theme={{ light: 'github-light', dark: 'github-dark' }} // multi-theme
++   *
++   * @see https://shiki.style/themes
++   */
++  theme: Theme | Themes;
++  /**
++   * Controls the application of default styles to the generated code blocks
++   *
++   * Default styles include padding, overflow handling, border radius, language label styling, and font settings
++   * @default true
++   */
++  addDefaultStyles?: boolean;
++  /**
++   * Add custom inline styles to the generated code block
++   */
++  style?: React.CSSProperties;
++  /**
++   * Add custom inline styles to the language label
++   */
++  langStyle?: React.CSSProperties;
++  /**
++   * Add custom CSS class names to the generated code block
++   */
++  className?: string;
++  /**
++   * Add custom CSS class names to the language label
++   */
++  langClassName?: string;
++  /**
++   * Whether to show the language label
++   * @default true
++   */
++  showLanguage?: boolean;
++  /**
++   * Whether to show line numbers
++   * @default false
++   */
++  showLineNumbers?: boolean;
++  /**
++   * Starting line number (when showLineNumbers is true)
++   * @default 1
++   */
++  startingLineNumber?: number;
++  /**
++   * The HTML element that wraps the generated code block.
++   * @default 'pre'
++   */
++  as?: React.ElementType;
++  /**
++   * Copy to clipboard button
++   */
++  copyComponent?: ReactNode;
+ }
+ 
+-export { type Element as E, type HighlighterOptions as H, type Language as L, type ShikiHighlighterProps as S, type Theme as T, type UseShikiHighlighter as U, type Themes as a, isInlineCode as i, rehypeInlineCodeProperty as r };
++export {
++  type Element as E,
++  type HighlighterOptions as H,
++  type Language as L,
++  type ShikiHighlighterProps as S,
++  type Theme as T,
++  type UseShikiHighlighter as U,
++  type Themes as a,
++  isInlineCode as i,
++  rehypeInlineCodeProperty as r,
++};
