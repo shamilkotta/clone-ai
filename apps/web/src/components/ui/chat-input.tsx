@@ -2,17 +2,34 @@
 
 import React, { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { CircleStop, Command, Paperclip, SendIcon, XIcon } from "lucide-react";
+import {
+  CircleStop,
+  Package,
+  Paperclip,
+  Plus,
+  SendIcon,
+  XIcon,
+} from "lucide-react";
 import { v4 as uuid } from "uuid";
 import { useAuth } from "@clerk/nextjs";
-import { useParams } from "next/navigation";
 
 import useAutoResizeTextarea from "@/hooks/use-auto-resize";
 import { cn } from "@/lib/utils";
 import Textarea from "./textarea";
 import { useChatContext } from "@/context/Chat";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "./dropdown-menu";
+import { useIsMobile } from "@/hooks/use-mobile";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { useSidebar } from "./sidebar";
 
-const ChatInput = () => {
+const ChatInput = ({ animate }: { animate?: boolean }) => {
   const [attachments, setAttachments] = useState<string[]>([]);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const { textareaRef, adjustHeight } = useAutoResizeTextarea({
@@ -28,8 +45,12 @@ const ChatInput = () => {
     stop,
     messages,
     threadId,
+    currentModel,
   } = useChatContext();
   const { isSignedIn } = useAuth();
+  const isMobile = useIsMobile();
+  const pathName = usePathname();
+  const { setOpen, setOpenMobile } = useSidebar();
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
@@ -59,7 +80,7 @@ const ChatInput = () => {
       {},
       {
         body: {
-          model: "gemini-2.0-flash-exp", // TODO
+          model: currentModel,
           threadId: id,
           userInfo: {
             timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
@@ -79,6 +100,11 @@ const ChatInput = () => {
     setAttachments((prev) => prev.filter((_, i) => i !== index));
   };
 
+  const handleCloseSidebar = () => {
+    setOpen(false);
+    setOpenMobile(false);
+  };
+
   return (
     <motion.div
       className={cn(
@@ -87,13 +113,13 @@ const ChatInput = () => {
           ? "fixed bottom-0 left-auto right-auto z-20"
           : "",
       )}
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: animate ? 0 : 1, y: animate ? 20 : 0 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6, ease: "easeOut" }}
     >
       <motion.div
         className="relative backdrop-blur-2xl bg-neutral-900/[0.02] dark:bg-white/[0.02] rounded-2xl border border-neutral-900/[0.05] dark:border-white/[0.05] shadow-2xl"
-        initial={{ scale: 0.98 }}
+        initial={{ scale: animate ? 0.98 : 1 }}
         animate={{ scale: 1 }}
         transition={{ delay: 0.1 }}
       >
@@ -164,30 +190,50 @@ const ChatInput = () => {
               className="relative p-2 rounded-lg transition-colors cursor-pointer disabled:cursor-not-allowed text-neutral-900/40 dark:text-white/40 hover:text-neutral-900/90 dark:hover:text-white/90 group"
             >
               <Paperclip className="w-4 h-4" />
-              <motion.span
-                className="absolute inset-0 bg-neutral-900/[0.05] dark:bg-white/[0.05] rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"
-                layoutId="button-highlight"
-              />
+              <span className="absolute inset-0 bg-neutral-900/[0.05] dark:bg-white/[0.05] rounded-lg group-hover:opacity-100 transition-opacity" />
             </motion.button>
-            <motion.button
-              type="button"
-              data-command-button
-              onClick={(e) => {
-                e.stopPropagation();
-              }}
-              whileTap={{ scale: 0.94 }}
-              className={cn(
-                "p-2 cursor-pointer text-neutral-900/40 dark:text-white/40 hover:text-neutral-900/90 dark:hover:text-white/90 rounded-lg transition-colors relative group",
-                false &&
-                  "bg-neutral-900/10 dark:bg-white/10 text-neutral-900/90 dark:text-white/90",
-              )}
-            >
-              <Command className="w-4 h-4" />
-              <motion.span
-                className="absolute inset-0 bg-neutral-900/[0.05] dark:bg-white/[0.05] rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"
-                layoutId="button-highlight"
-              />
-            </motion.button>
+
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <motion.button
+                  type="button"
+                  data-command-button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                  }}
+                  whileTap={{ scale: 0.94 }}
+                  className={cn(
+                    "p-2 cursor-pointer flex items-center gap-1.5 text-neutral-900/40 dark:text-white/40 hover:text-neutral-900/90 dark:hover:text-white/90 rounded-lg transition-colors relative group",
+                    false &&
+                      "bg-neutral-900/10 dark:bg-white/10 text-neutral-900/90 dark:text-white/90",
+                    "focus-within:border-0",
+                  )}
+                >
+                  <Package className="w-4 h-4" />
+                  <span className="text-xs">Gemini</span>
+                  <span className="absolute inset-0 bg-neutral-900/[0.05] dark:bg-white/[0.05] rounded-lg group-hover:opacity-100 transition-opacity" />
+                </motion.button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent
+                className="w-56 rounded-lg"
+                side={isMobile ? "bottom" : "right"}
+                align={isMobile ? "end" : "start"}
+              >
+                <DropdownMenuItem disabled>
+                  <span>Your Models</span>
+                </DropdownMenuItem>
+                <Link
+                  href={`/profile/models?ref=${pathName}`}
+                  onClick={handleCloseSidebar}
+                >
+                  <DropdownMenuItem>
+                    <Plus />
+                    <span>Add Model</span>
+                  </DropdownMenuItem>
+                </Link>
+                <DropdownMenuSeparator />
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
 
           <motion.button

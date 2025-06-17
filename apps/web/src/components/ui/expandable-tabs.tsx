@@ -11,6 +11,7 @@ interface Tab {
   type?: never;
   alwaysShow?: boolean;
   onClick?: () => void;
+  onHover?: () => void;
   iconProps?: React.ComponentProps<LucideIcon>;
 }
 
@@ -81,7 +82,10 @@ export function ExpandableTabs({ tabs, className }: ExpandableTabsProps) {
             animate="animate"
             custom={selected === index && tab.title}
             onClick={() => tab.onClick?.()}
-            onMouseEnter={() => setSelected(index)}
+            onMouseEnter={() => {
+              setSelected(index);
+              tab.onHover?.();
+            }}
             onMouseLeave={() => setSelected(null)}
             transition={transition}
             className={cn(

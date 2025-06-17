@@ -7,7 +7,6 @@ import {
   CodeXmlIcon,
   BookOpenTextIcon,
 } from "lucide-react";
-import { useAuth, useUser } from "@clerk/nextjs";
 import { motion } from "framer-motion";
 
 import Suggestions from "./Suggestions";
@@ -22,6 +21,7 @@ interface CommandSuggestion {
 type QuerySuggestions = Record<string, string[]>;
 type Props = {
   suggestions?: Promise<QuerySuggestions>;
+  userName?: string | null;
 };
 
 const commandSuggestions: CommandSuggestion[] = [
@@ -50,8 +50,7 @@ const commandSuggestions: CommandSuggestion[] = [
 const Greeting = (props: Props) => {
   const [currentSelected, setCurrentSelected] = useState("Create");
   const { messages } = useChatContext();
-  const { user } = useUser();
-  const username = user?.lastName || user?.firstName || user?.fullName;
+  const username = props.userName;
 
   if (messages && messages?.length > 0) return null;
 

@@ -1,34 +1,29 @@
-import React, { Suspense } from "react";
+import React from "react";
 
-import { SidebarProvider } from "@/components/ui/sidebar";
-import { AppSidebar } from "@/components/app-sidebar";
 import ChatInput from "@/components/ui/chat-input";
 import ChatContext from "@/context/Chat";
 import ChatScreen from "@/components/ChatScreen";
 import Bg from "@/components/Bg";
+import { getQuerySuggestions } from "@/services/actions";
+import { currentUser } from "@clerk/nextjs/server";
 import Toolbox from "@/components/Toolbox";
 
-const Chat = () => {
-  const querySuggestions = fetch(process.env.URL + "/api/suggestions", {
-    next: {
-      revalidate: 60 * 60 * 12,
-    },
-  }).then((res) => res.json());
+export const experimental_ppr = true;
+
+const Chat = async () => {
+  const querySuggestions = getQuerySuggestions();
+  const user = await currentUser();
+  const userName = user?.lastName || user?.firstName || user?.fullName;
 
   return (
-    <SidebarProvider defaultOpen={false}>
-      <Suspense fallback={<></>}>
-        <AppSidebar />
-      </Suspense>
-      <ChatContext>
-        <Toolbox />
-        <main className="relative h-screen w-full flex flex-col justify-center items-center">
-          <Bg />
-          <ChatScreen suggestions={querySuggestions} />
-          <ChatInput />
-        </main>
-      </ChatContext>
-    </SidebarProvider>
+    <ChatContext>
+      <Toolbox isLoggedIn={Boolean(user)} />
+      <main className="relative h-screen w-full flex flex-col justify-center items-center">
+        <Bg />
+        <ChatScreen userName={userName} suggestions={querySuggestions} />
+        <ChatInput animate />
+      </main>
+    </ChatContext>
   );
 };
 

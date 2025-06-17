@@ -43,8 +43,6 @@
 
 :root {
   --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);
@@ -74,6 +72,8 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.145 0 0);
 }
 
 .dark {
@@ -152,19 +152,19 @@ textarea {
   scrollbar-width: none;
 }
 
-.cl-cardBox {
+.cl-cardBox:not(.cl-signIn-start),
+.cl-userProfile-root {
   height: 100%;
   border-radius: 0;
   max-width: 100%;
   width: 100%;
 }
 
-.cl-navbar {
-  background: none;
+.cl-navbar:not(.cl-signIn-start) {
+  background: black;
 }
 
-.cl-scrollBox {
-  background: none;
+.cl-scrollBox:not(.cl-signIn-start) {
+  background: black;
   box-shadow: none;
-  width: calc(100vw - 14.25rem);
 }

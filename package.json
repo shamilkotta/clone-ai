@@ -8,9 +8,11 @@
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "check-types": "turbo run check-types",
     "api": "pnpm --filter api",
-    "web": "pnpm --filter web"
+    "web": "pnpm --filter web",
+    "db": "pnpm --filter @repo/db"
   },
   "devDependencies": {
+    "@types/node": "^24.0.3",
     "prettier": "^3.5.3",
     "turbo": "^2.5.4",
     "typescript": "5.8.2"
@@ -23,5 +25,8 @@
     "patchedDependencies": {
       "react-shiki@0.7.1": "patches/react-shiki@0.7.1.patch"
     }
+  },
+  "dependencies": {
+    "@prisma/extension-accelerate": "^2.0.1"
   }
 }

@@ -1,76 +1,53 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import {
-  PlusIcon as Plus,
-  LogIn,
-  Sidebar,
-  Search,
-  LoaderCircle,
-} from "lucide-react";
+import React, { useMemo } from "react";
+import { PlusIcon as Plus, LogIn, Sidebar, Search } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useAuth } from "@clerk/nextjs";
 
 import { ExpandableTabs, TabItem } from "./ui/expandable-tabs";
 import { useSidebar } from "./ui/sidebar";
 
-const Toolbox = () => {
+const Toolbox = ({ isLoggedIn }: { isLoggedIn: boolean }) => {
   const { toggleSidebar } = useSidebar();
   const router = useRouter();
-  const { isLoaded, isSignedIn } = useAuth();
 
-  const [tabs, setTabs] = useState<TabItem[]>([
-    {
-      icon: LoaderCircle,
-      iconProps: {
-        className: "animate-[spin_2s_linear_infinite]",
-      },
-    },
-    {
-      title: "New",
-      icon: Plus,
-      onClick: () => {
-        window.location.reload();
-      },
-    },
-  ]);
+  const newChat = () => {
+    router.push("/");
+  };
 
-  useEffect(() => {
-    if (isLoaded && isSignedIn) {
-      setTabs([
+  const tabs: TabItem[] = useMemo(() => {
+    if (isLoggedIn) {
+      return [
         { icon: Sidebar, onClick: toggleSidebar },
         { title: "⌘K", icon: Search },
         { type: "separator" },
         {
           title: "New",
           icon: Plus,
-          onClick: () => {
-            window.location.reload();
+          onHover: () => {
+            router.prefetch("/");
           },
+          onClick: newChat,
         },
-      ]);
-    } else if (isLoaded) {
-      setTabs([
-        {
-          title: "Login",
-          icon: LogIn,
-          alwaysShow: true,
-          onClick: () => {
-            router.push("/sign-in");
-          },
-        },
-        { type: "separator" },
-        {
-          title: "New",
-          icon: Plus,
-          onClick: () => {
-            window.location.reload();
-          },
-        },
-      ]);
+      ];
     }
-    return () => {};
-  }, [isLoaded, isSignedIn, toggleSidebar]);
+    return [
+      {
+        title: "Login",
+        icon: LogIn,
+        alwaysShow: true,
+        onClick: () => {
+          router.push("/sign-in");
+        },
+      },
+      { type: "separator" },
+      {
+        title: "New",
+        icon: Plus,
+        onClick: newChat,
+      },
+    ];
+  }, [isLoggedIn, toggleSidebar]);
 
   return <ExpandableTabs tabs={tabs} className="fixed top-4 left-4 z-10" />;
 };

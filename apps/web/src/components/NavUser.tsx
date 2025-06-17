@@ -1,8 +1,9 @@
 "use client";
 
-import { BadgeCheck, ChevronsUpDown, LogOut, ShieldCheck } from "lucide-react";
+import { BadgeCheck, ChevronsUpDown, LogOut, Package } from "lucide-react";
 import { useAuth } from "@clerk/nextjs";
 import { usePathname, useRouter } from "next/navigation";
+import { useCallback } from "react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -20,7 +21,6 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { useCallback } from "react";
 
 export function NavUser({
   user,
@@ -31,18 +31,20 @@ export function NavUser({
     avatar: string;
   };
 }) {
-  const { isMobile } = useSidebar();
+  const { isMobile, setOpenMobile, setOpen } = useSidebar();
   const { signOut } = useAuth();
   const router = useRouter();
   const pathName = usePathname();
 
   const goToProfile = useCallback(
     (path: string) => {
+      setOpen(false);
+      setOpenMobile(false);
       const params = new URLSearchParams();
-      params.set("rf", pathName);
+      params.set("ref", pathName);
       router.push(path + "?" + params.toString());
     },
-    [router, pathName],
+    [router, pathName, setOpen, setOpenMobile],
   );
 
   return (
@@ -100,11 +102,9 @@ export function NavUser({
                 <BadgeCheck />
                 Account
               </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={() => goToProfile("/profile/security")}
-              >
-                <ShieldCheck />
-                Security
+              <DropdownMenuItem onClick={() => goToProfile("/profile/models")}>
+                <Package />
+                Models
               </DropdownMenuItem>
               {/* <DropdownMenuItem>
                 <Bell />

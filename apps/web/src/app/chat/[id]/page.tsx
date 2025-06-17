@@ -1,29 +1,15 @@
-import React, { cache, Suspense } from "react";
+import React, { cache } from "react";
 import { redirect } from "next/navigation";
-import { currentUser } from "@clerk/nextjs/server";
 
-import { SidebarProvider } from "@/components/ui/sidebar";
-import { AppSidebar } from "@/components/app-sidebar";
 import ChatContext from "@/context/Chat";
 import ChatScreen from "@/components/ChatScreen";
 import ChatInput from "@/components/ui/chat-input";
+import { getThread } from "@/services/actions";
 import Toolbox from "@/components/Toolbox";
-import { getThread } from "@/services/thread";
-
-const loadThreadData = cache(async (id: string) => {
-  try {
-    const user = await currentUser();
-    if (!user) return;
-    const thread = await getThread(id, user);
-    if (!thread) return;
-    return thread;
-  } catch {
-    return;
-  }
-});
 
 type Params = { params: Promise<{ id: string }> };
 
+const loadThreadData = cache(getThread);
 export async function generateMetadata({ params }: Params) {
   const { id } = await params;
   const thread = await loadThreadData(id);
@@ -37,6 +23,7 @@ export async function generateMetadata({ params }: Params) {
 
   return {
     title: thread.title,
+    description: "Another clone of ChatGPT",
   };
 }
 
@@ -46,18 +33,13 @@ const Chat = async ({ params }: Params) => {
   if (!thread) redirect("/");
 
   return (
-    <SidebarProvider defaultOpen={false}>
-      <Suspense fallback={<></>}>
-        <AppSidebar />
-      </Suspense>
-      <ChatContext thread={thread}>
-        <Toolbox />
-        <main className="relative h-screen w-full flex flex-col justify-center items-center">
-          <ChatScreen />
-          <ChatInput />
-        </main>
-      </ChatContext>
-    </SidebarProvider>
+    <ChatContext thread={thread}>
+      <Toolbox isLoggedIn={true} />
+      <main className="relative h-screen w-full flex flex-col justify-center items-center">
+        <ChatScreen />
+        <ChatInput animate={false} />
+      </main>
+    </ChatContext>
   );
 };
 

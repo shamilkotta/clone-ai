@@ -1,10 +1,11 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import React from "react";
+import React, { useEffect } from "react";
 import Markdown from "react-markdown";
 import { rehypeInlineCodeProperty } from "react-shiki";
 import remarkGfm from "remark-gfm";
+import { usePathname } from "next/navigation";
 
 import CodeHighlight from "./CodeHighlight";
 import { useChatContext } from "@/context/Chat";
@@ -14,10 +15,19 @@ import TypingDots from "./ui/typing-dots";
 
 type Props = {
   suggestions?: any;
+  userName?: string | null;
 };
 
-const ChatScreen = ({ suggestions }: Props) => {
-  const { messages, status } = useChatContext();
+const ChatScreen = ({ suggestions, userName }: Props) => {
+  const { messages, status, setMessages } = useChatContext();
+  const pathName = usePathname();
+
+  useEffect(() => {
+    if (pathName == "/") {
+      setMessages?.([]);
+    }
+    return () => {};
+  }, [pathName]);
 
   return (
     <div
@@ -26,7 +36,7 @@ const ChatScreen = ({ suggestions }: Props) => {
         messages && messages.length > 0 ? "pb-36" : "pb-0",
       )}
     >
-      <Greeting suggestions={suggestions} />
+      <Greeting userName={userName} suggestions={suggestions} />
       <div className="w-full max-w-3xl mx-auto py-4">
         {messages?.length != 0 && (
           <div className="chat-message flex gap-3 flex-col mb-0 grow dark:text-white text-neutral-900 pb-2.5">
@@ -34,7 +44,7 @@ const ChatScreen = ({ suggestions }: Props) => {
               message.role == "user" ? (
                 <AnimatePresence key={message.id}>
                   <motion.div
-                    className="backdrop-blur-2xl dark:bg-white/[0.05] bg-neutral-900/[0.05] rounded-lg rounded-tr-none px-4 py-2 dark:shadow-lg shadow-sm border dark:border-white/[0.05] border-neutral-900/[0.05] ml-auto mr-0"
+                    className="backdrop-blur-2xl mb-4 dark:bg-white/[0.05] bg-neutral-900/[0.05] rounded-lg rounded-tr-none px-4 py-2 dark:shadow-lg shadow-sm border dark:border-white/[0.05] border-neutral-900/[0.05] ml-auto mr-0"
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: 20 }}
