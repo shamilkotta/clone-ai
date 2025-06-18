@@ -4,12 +4,12 @@ import { prisma } from "@repo/db";
 export async function GET(request: Request) {
   const { pathname } = new URL(request.url);
   const threadId = pathname.split("/").pop();
-  const user = await currentUser();
-
-  if (!threadId || !user) {
-    return Response.json({ error: "Thread ID is required" }, { status: 400 });
-  }
   try {
+    const user = await currentUser();
+
+    if (!threadId || !user) {
+      return Response.json({ error: "Thread ID is required" }, { status: 400 });
+    }
     const thread = await prisma.thread.findUnique({
       where: { id: threadId, authorId: user.id },
     });

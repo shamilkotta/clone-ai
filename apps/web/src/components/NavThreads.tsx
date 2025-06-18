@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
-import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import {
   ArrowUpRight,
   Link as LinkIcon,
@@ -37,15 +37,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 export function NavThreads() {
   const pathname = usePathname();
-  const { threadId } = useSidebar();
-
-  const { data: currentThread, isFetching } = useQuery({
-    queryKey: ["thread", threadId],
-    queryFn: () => getThread(threadId!),
-    staleTime: Infinity,
-    retry: 0,
-    enabled: Boolean(threadId),
-  });
+  const { cThread } = useSidebar();
 
   const {
     data: threads,
@@ -92,35 +84,35 @@ export function NavThreads() {
 
   return (
     <SidebarGroup className="group-data-[collapsible=icon]:hidden">
-      {/* {isFetching && threadId ? (
-        <>
-          <SidebarGroupLabel className="mt-2">Current</SidebarGroupLabel>
-          <SidebarMenu>
-            <SidebarMenuItem>
-              <Skeleton className="h-8 w-full" />
-            </SidebarMenuItem>
-          </SidebarMenu>
-        </>
-      ) : (
-        currentThread && (
-          <>
-            <SidebarGroupLabel className="mt-2">Current</SidebarGroupLabel>
-            <SidebarMenu>
-              <SidebarMenuItem>
+      <>
+        <SidebarGroupLabel className="mt-2">Current</SidebarGroupLabel>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            {cThread ? (
+              <>
                 <SidebarMenuButton isActive asChild>
                   <Link
-                    href={`/chat/${currentThread.id}`}
-                    title={currentThread.title}
+                    suppressHydrationWarning
+                    href={`/chat/${cThread.id}`}
+                    title={cThread.title}
                   >
-                    <span>{currentThread.title || "New Chat"}</span>
+                    <span suppressHydrationWarning>
+                      {cThread.title || "New Chat"}
+                    </span>
                   </Link>
                 </SidebarMenuButton>
-                <ThreadDropdown item={currentThread} />
-              </SidebarMenuItem>
-            </SidebarMenu>
-          </>
-        )
-      )} */}
+                <ThreadDropdown item={cThread} />
+              </>
+            ) : (
+              <SidebarMenuButton isActive asChild>
+                <Link suppressHydrationWarning href="/" title="New Chat">
+                  <span suppressHydrationWarning>New Chat</span>
+                </Link>
+              </SidebarMenuButton>
+            )}
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </>
 
       {isLoading ? (
         <div className="mt-6 flex flex-col gap-2.5 px-2.5">

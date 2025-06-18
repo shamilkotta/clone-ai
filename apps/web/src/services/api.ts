@@ -35,12 +35,36 @@ export const getUserModels = async () => {
   if (!response.ok) {
     throw new Error("Failed to fetch models");
   }
+  const data = await response.json();
+  return data?.data || [];
+};
+
+export const createUserModel = async (model: {
+  name: string;
+  model: string;
+  provider: string;
+  key: string;
+}) => {
+  const response = await fetch("/api/models", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(model),
+  });
+  if (!response.ok) {
+    throw new Error("Failed to create model");
+  }
   return response.json();
 };
 
 export const deleteUserModel = async (id: string) => {
-  const response = await fetch(`/api/models/${id}`, {
+  const response = await fetch(`/api/models`, {
     method: "DELETE",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ id }),
   });
   if (!response.ok) {
     throw new Error("Failed to delete model");

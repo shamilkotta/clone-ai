@@ -1,25 +1,53 @@
-import { MODELS } from "@/utils/models";
-import { google } from "@ai-sdk/google";
-import { vercel } from "@ai-sdk/vercel";
-import { openai } from "@ai-sdk/openai";
+import { User } from "@clerk/nextjs/server";
+import { google, createGoogleGenerativeAI } from "@ai-sdk/google";
+import { vercel, createVercel } from "@ai-sdk/vercel";
+import { openai, createOpenAI } from "@ai-sdk/openai";
 
-export const getModel = (id: string) => {
+import { MODELS } from "@/utils/models";
+import { prisma } from "@repo/db";
+
+export const getModel = (id: string, user: User | null) => {
   const selected = id.replace("custom.", "");
-  let provider = MODELS.find((model) => model.model === selected)?.provider;
-  if (!provider) {
+  const model = MODELS.find((model) => model.model === selected);
+  if (!model) {
     return null;
   }
 
-  return {
-    provider: getProvider(provider, id),
-    custom: id.startsWith("custom."),
-  };
+  if (id.startsWith("custom.")) {
+    if (!user) return null;
+    return createProvider(model.provider, model.model, user.id);
+  }
+  return getProvider(model.provider, model.model);
 };
 
 const getProvider = (provider: string, id: string) => {
-  return {
-    Google: google(id),
-    Vercel: vercel(id),
-    OpenAI: openai(id),
+  const prov = {
+    Google: google,
+    Vercel: vercel,
+    OpenAI: openai,
   }[provider];
+
+  return prov ? prov(id) : null;
+};
+
+const createProvider = async (provider: string, id: string, userId: string) => {
+  const userKey = await prisma.userModels.findFirst({
+    where: { model: id, userId: userId },
+    select: { key: true },
+  });
+
+  if (!userKey?.key) return null;
+  const modelId = id.replace("custom.", "");
+
+  const prv = {
+    Google: createGoogleGenerativeAI,
+    Vercel: createVercel,
+    OpenAI: createOpenAI,
+  }[provider];
+
+  return prv
+    ? prv({
+        apiKey: userKey.key,
+      })(modelId)
+    : null;
 };

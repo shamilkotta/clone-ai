@@ -39,3 +39,13 @@ model Message {
   model     String?
   Thread    Thread   @relation(fields: [threadId], references: [id], onDelete: Cascade)
 }
+
+model UserModels {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  userId    String
+  model     String
+  name      String
+  key       String
+}

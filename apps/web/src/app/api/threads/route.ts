@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { currentUser } from "@clerk/nextjs/server";
 
 import { prisma } from "@repo/db";
 
@@ -8,7 +8,12 @@ export async function GET(request: Request) {
   const pageSize = parseInt(searchParams.get("size") || "15", 10);
 
   try {
+    const user = await currentUser();
+    if (!user) return Response.json({ error: "Unauthorized" }, { status: 401 });
     const threads = await prisma.thread.findMany({
+      where: {
+        authorId: user?.id,
+      },
       skip: page * pageSize,
       take: pageSize,
       orderBy: {
@@ -16,14 +21,11 @@ export async function GET(request: Request) {
       },
     });
 
-    return NextResponse.json({
+    return Response.json({
       data: threads,
     });
   } catch (error) {
     console.error("Error fetching threads:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch threads" },
-      { status: 500 },
-    );
+    return Response.json({ error: "Failed to fetch threads" }, { status: 500 });
   }
 }

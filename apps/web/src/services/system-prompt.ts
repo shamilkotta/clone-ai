@@ -9,7 +9,7 @@ export const generateSystemPrompt = (
   user: User | null,
   userInfo: ChatSchema["userInfo"],
 ) => {
-  let message = `- You're CloneAI, An AI assistant powered by ${"Gemini"}. 
+  let message = `- You're CloneAI, An AI assistant chat interface. 
        - When generating code ensure its properly formatted. and present it in Markdown code blocks with correct language extensions
        - Current date and tiem including timzone is ${new Date().toLocaleString(
          "en-US",

@@ -1,6 +1,3 @@
-// import { openai } from "@ai-sdk/openai";
-import { google } from "@ai-sdk/google";
-// import { vercel } from "@ai-sdk/vercel";
 import { currentUser } from "@clerk/nextjs/server";
 import { streamText } from "ai";
 import { waitUntil } from "@vercel/functions";
@@ -9,6 +6,7 @@ import { prisma, Role } from "@repo/db";
 import { generateSystemPrompt, generateTitle } from "@/services/system-prompt";
 import { chatSchema } from "@/utils/schema";
 import { NextResponse } from "next/server";
+import { getModel } from "@/services/models";
 
 // Allow streaming responses up to 30 seconds
 export const maxDuration = 30;
@@ -34,7 +32,7 @@ export async function POST(req: Request) {
     );
   }
 
-  const selectedModel = model || "gemini-2.0-flash-exp";
+  const selectedModel = model || "models/gemini-2.0-flash-exp";
   const user = await currentUser();
   const systemPrompt = generateSystemPrompt(selectedModel, user, userInfo);
 
@@ -90,8 +88,15 @@ export async function POST(req: Request) {
     });
   };
 
+  const provider = await getModel(selectedModel, user);
+  if (!provider) {
+    return Response.json(
+      { success: false, message: "Selected model not found" },
+      { status: 404 },
+    );
+  }
   const result = streamText({
-    model: google("models/gemini-2.0-flash-exp"),
+    model: provider,
     messages,
     system: systemPrompt,
     onFinish: ({ text }) => {

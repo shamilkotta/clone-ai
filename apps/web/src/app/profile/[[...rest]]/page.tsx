@@ -1,10 +1,11 @@
 "use client";
 
+import React from "react";
+import { useSearchParams } from "next/navigation";
+
 import ModelsList from "@/components/ModelsList";
 import { UserProfile } from "@clerk/nextjs";
 import { ArrowLeftToLine, Package } from "lucide-react";
-import { useSearchParams } from "next/navigation";
-import React from "react";
 
 const Profile = () => {
   const params = useSearchParams();

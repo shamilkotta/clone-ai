@@ -6,12 +6,11 @@ import {
   CircleStop,
   Package,
   Paperclip,
+  Pin,
   Plus,
   SendIcon,
   XIcon,
 } from "lucide-react";
-import { v4 as uuid } from "uuid";
-import { useAuth } from "@clerk/nextjs";
 
 import useAutoResizeTextarea from "@/hooks/use-auto-resize";
 import { cn } from "@/lib/utils";
@@ -28,6 +27,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useSidebar } from "./ui/sidebar";
+import { MODELS } from "@/utils/models";
 
 const ChatInput = ({ animate }: { animate?: boolean }) => {
   const [attachments, setAttachments] = useState<string[]>([]);
@@ -38,20 +38,20 @@ const ChatInput = ({ animate }: { animate?: boolean }) => {
   });
   const [inputFocused, setInputFocused] = useState(false);
   const {
-    handleSubmit,
+    submitHandler,
     handleInputChange,
     input,
     status,
     stop,
     messages,
-    threadId,
-    setTempId,
+    setCurrentModel,
     currentModel,
+    defaltModel,
+    setModalAsDefault,
   } = useChatContext();
-  const { isSignedIn } = useAuth();
   const isMobile = useIsMobile();
   const pathName = usePathname();
-  const { setOpen, setOpenMobile, setThreadId } = useSidebar();
+  const { setOpen, setOpenMobile } = useSidebar();
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
@@ -72,25 +72,7 @@ const ChatInput = ({ animate }: { animate?: boolean }) => {
   };
 
   const handleSubmitForm = () => {
-    let id = threadId;
-    if (isSignedIn && !id) {
-      id = uuid();
-      setTempId?.(id);
-      setThreadId(id);
-      window.history.pushState({}, "", "/chat/" + id);
-    }
-    handleSubmit?.(
-      {},
-      {
-        body: {
-          model: currentModel,
-          threadId: id,
-          userInfo: {
-            timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-          },
-        },
-      },
-    );
+    submitHandler?.();
     adjustHeight(true);
   };
 
@@ -106,6 +88,13 @@ const ChatInput = ({ animate }: { animate?: boolean }) => {
   const handleCloseSidebar = () => {
     setOpen(false);
     setOpenMobile(false);
+  };
+
+  const handleSelectModel = (model: SelectedModel) => {
+    setCurrentModel?.({
+      name: model.name,
+      model: model.model,
+    });
   };
 
   return (
@@ -211,7 +200,9 @@ const ChatInput = ({ animate }: { animate?: boolean }) => {
                   )}
                 >
                   <Package className="w-4 h-4" />
-                  <span className="text-xs">Gemini</span>
+                  <span className="text-xs max-w-[170px] overflow-hidden text-nowrap text-ellipsis">
+                    {currentModel?.name}
+                  </span>
                   <span className="absolute inset-0 bg-neutral-900/[0.05] dark:bg-white/[0.05] rounded-lg group-hover:opacity-100 transition-opacity" />
                 </motion.button>
               </DropdownMenuTrigger>
@@ -233,6 +224,38 @@ const ChatInput = ({ animate }: { animate?: boolean }) => {
                   </DropdownMenuItem>
                 </Link>
                 <DropdownMenuSeparator />
+                {MODELS.map((model) => (
+                  <DropdownMenuItem
+                    key={model.model}
+                    className={cn(
+                      currentModel?.model == model.model ? "bg-accent/60" : "",
+                      "group relative",
+                    )}
+                    onClick={() => {
+                      handleSelectModel(model);
+                    }}
+                  >
+                    <span className="flex items-center gap-2">
+                      <span className="text-xs">{model.name}</span>
+                      {model.model == defaltModel?.model && (
+                        <span className="text-xs text-green-500">Default</span>
+                      )}
+                    </span>
+                    {model.model !== defaltModel?.model && (
+                      <span
+                        onClick={() => setModalAsDefault?.(model)}
+                        className="absolute cursor-pointer hidden rounded-full p-1 hover:bg-white/30 right-1 left-auto top-auto bottom-auto group-hover:block"
+                      >
+                        <Pin />
+                      </span>
+                    )}
+                  </DropdownMenuItem>
+                ))}
+                <DropdownMenuItem disabled>
+                  <span className="text-xs text-neutral-900/40 dark:text-white/40">
+                    More models coming soon!
+                  </span>
+                </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
@@ -250,7 +273,7 @@ const ChatInput = ({ animate }: { animate?: boolean }) => {
             className={cn(
               "px-3 py-3 rounded-lg cursor-pointer disabled:cursor-not-allowed text-sm font-medium transition-all",
               "flex items-center gap-2",
-              input?.trim()
+              input?.trim() || status == "streaming"
                 ? "bg-neutral-900 dark:bg-white text-[#e8e8ff] dark:text-[#0A0A0B] shadow-lg shadow-white/10"
                 : "bg-neutral-900/[0.05] dark:bg-white/[0.05] text-neutral-900/40 dark:text-white/40",
             )}

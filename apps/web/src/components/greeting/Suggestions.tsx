@@ -5,14 +5,14 @@ import { useIsMobile } from "@/hooks/use-mobile";
 
 type QuerySuggestions = Record<string, string[]>;
 type Props = {
-  suggestions?: Promise<QuerySuggestions>;
+  suggestions?: QuerySuggestions;
   currentSelected: string;
 };
 
 const Suggestions = (props: Props) => {
   let suggestions: QuerySuggestions = {};
   if (props.suggestions) {
-    suggestions = use(props.suggestions);
+    suggestions = props.suggestions;
   }
   const { setInput } = useChatContext();
   const isMobile = useIsMobile();

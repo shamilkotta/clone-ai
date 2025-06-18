@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/command";
 import useDebounce from "@/hooks/use-debounce";
 import { getAllThreads, searchThreads } from "@/services/api";
+import { useSidebar } from "./ui/sidebar";
 
 export default function SeachDialog({
   open,

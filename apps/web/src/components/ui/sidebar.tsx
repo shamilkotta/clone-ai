@@ -25,7 +25,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { set } from "date-fns";
+import { Thread } from "@repo/db";
 
 const SIDEBAR_COOKIE_NAME = "sidebar_state";
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7;
@@ -42,8 +42,8 @@ type SidebarContextProps = {
   setOpenMobile: (open: boolean) => void;
   isMobile: boolean;
   toggleSidebar: () => void;
-  threadId: string | null;
-  setThreadId: (threadId: string | null) => void;
+  cThread: Thread | null;
+  setCThread: (threadId: Thread | null) => void;
 };
 
 const SidebarContext = React.createContext<SidebarContextProps | null>(null);
@@ -74,9 +74,7 @@ function SidebarProvider({
   const [openMobile, setOpenMobile] = React.useState(false);
   const params = useParams();
   const pathname = usePathname();
-  const [threadId, setThreadId] = React.useState<string | null>(
-    (params.id as string) || null,
-  );
+  const [cThread, setCThread] = React.useState<Thread | null>(null);
 
   // This is the internal state of the sidebar.
   // We use openProp and setOpenProp for control from outside the component.
@@ -118,14 +116,6 @@ function SidebarProvider({
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [toggleSidebar]);
 
-  React.useEffect(() => {
-    if (!pathname.startsWith("/chat")) {
-      setThreadId(null);
-    } else {
-      setThreadId(params.id as string);
-    }
-  }, [pathname, params.id]);
-
   // We add a state so that we can do data-state="expanded" or "collapsed".
   // This makes it easier to style the sidebar with Tailwind classes.
   const state = open ? "expanded" : "collapsed";
@@ -139,8 +129,8 @@ function SidebarProvider({
       openMobile,
       setOpenMobile,
       toggleSidebar,
-      setThreadId,
-      threadId,
+      setCThread,
+      cThread,
     }),
     [
       state,
@@ -150,8 +140,8 @@ function SidebarProvider({
       openMobile,
       setOpenMobile,
       toggleSidebar,
-      setThreadId,
-      threadId,
+      setCThread,
+      cThread,
     ],
   );
 

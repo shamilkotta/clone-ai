@@ -20,7 +20,7 @@ interface CommandSuggestion {
 
 type QuerySuggestions = Record<string, string[]>;
 type Props = {
-  suggestions?: Promise<QuerySuggestions>;
+  suggestions?: QuerySuggestions;
   userName?: string | null;
 };
 

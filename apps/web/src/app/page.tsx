@@ -7,11 +7,20 @@ import Bg from "@/components/Bg";
 import { getQuerySuggestions } from "@/services/actions";
 import { currentUser } from "@clerk/nextjs/server";
 import Toolbox from "@/components/Toolbox";
+import { unstable_cache } from "next/cache";
 
 export const experimental_ppr = true;
 
+const getCachedSuggestions = unstable_cache(
+  getQuerySuggestions,
+  ["suggestions"],
+  {
+    revalidate: 60 * 60,
+  },
+);
+
 const Chat = async () => {
-  const querySuggestions = getQuerySuggestions();
+  const querySuggestions = await getCachedSuggestions();
   const user = await currentUser();
   const userName = user?.lastName || user?.firstName || user?.fullName;
 
