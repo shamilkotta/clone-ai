@@ -40,7 +40,7 @@ export default async function RootLayout({
           className={`${geistSans.variable} ${geistMono.variable} antialiased dark`}
         >
           <QueryProvider>
-            <SidebarProvider defaultOpen={false}>
+            <SidebarProvider defaultOpen={true}>
               <Suspense fallback={<></>}>
                 <AppSidebar />
               </Suspense>

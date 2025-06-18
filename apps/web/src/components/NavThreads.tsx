@@ -1,7 +1,7 @@
 "use client";
 
-import { use, useMemo } from "react";
-import { useInfiniteQuery } from "@tanstack/react-query";
+import { useMemo } from "react";
+import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import {
   ArrowUpRight,
   Link as LinkIcon,
@@ -12,6 +12,8 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { isToday, isYesterday } from "date-fns";
+import { AnimatePresence } from "framer-motion";
+import { usePathname } from "next/navigation";
 
 import {
   DropdownMenu,
@@ -29,31 +31,35 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { getAllThreads } from "@/services/api";
+import { getAllThreads, getThread } from "@/services/api";
 import { Thread } from "@repo/db";
+import { Skeleton } from "@/components/ui/skeleton";
 
-export function NavThreads({
-  threadsPromise,
-}: {
-  threadsPromise: Promise<Thread[]>;
-}) {
-  const { isMobile } = useSidebar();
-  const initialThreads = use(threadsPromise);
+export function NavThreads() {
+  const pathname = usePathname();
+  const { threadId } = useSidebar();
+
+  const { data: currentThread, isFetching } = useQuery({
+    queryKey: ["thread", threadId],
+    queryFn: () => getThread(threadId!),
+    staleTime: Infinity,
+    retry: 0,
+    enabled: Boolean(threadId),
+  });
 
   const {
     data: threads,
     fetchNextPage,
     hasNextPage,
+    isLoading,
     isFetchingNextPage,
   } = useInfiniteQuery({
     queryKey: ["threads"],
     queryFn: ({ pageParam }) => getAllThreads(pageParam),
-    initialData: () => ({ pages: [initialThreads], pageParams: [0] }),
-    initialPageParam: 1,
+    initialPageParam: 0,
     getNextPageParam: (lastPage, pages, lastParam) =>
-      lastPage.length > 0 ? lastParam + 1 : null,
+      lastPage?.length > 0 ? lastParam + 1 : null,
     retry: 1,
-    enabled: false,
     staleTime: Infinity,
   });
 
@@ -68,7 +74,7 @@ export function NavThreads({
       older: [],
     };
 
-    threads.pages.forEach((page) => {
+    threads?.pages.forEach((page) => {
       page.forEach((thread) => {
         const createdAt = new Date(thread.updatedAt);
         if (isToday(createdAt)) {
@@ -86,76 +92,80 @@ export function NavThreads({
 
   return (
     <SidebarGroup className="group-data-[collapsible=icon]:hidden">
-      {Object.entries(groupedThreads).map(([group, items]) => {
-        if (items.length === 0) return null;
-        return (
-          <div key={group}>
-            <SidebarGroupLabel className="mt-2">
-              {group === "today"
-                ? "Today"
-                : group === "yesterday"
-                  ? "Yesterday"
-                  : "Older"}
-            </SidebarGroupLabel>
+      {/* {isFetching && threadId ? (
+        <>
+          <SidebarGroupLabel className="mt-2">Current</SidebarGroupLabel>
+          <SidebarMenu>
+            <SidebarMenuItem>
+              <Skeleton className="h-8 w-full" />
+            </SidebarMenuItem>
+          </SidebarMenu>
+        </>
+      ) : (
+        currentThread && (
+          <>
+            <SidebarGroupLabel className="mt-2">Current</SidebarGroupLabel>
             <SidebarMenu>
-              {items.map((item) => (
-                <SidebarMenuItem key={item.id}>
-                  <SidebarMenuButton asChild>
-                    <Link href={`/chat/${item.id}`} title={item.title}>
-                      <span>{item.title || "New Chat"}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <SidebarMenuAction showOnHover>
-                        <MoreHorizontal />
-                        <span className="sr-only">More</span>
-                      </SidebarMenuAction>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent
-                      className="w-56 rounded-lg"
-                      side={isMobile ? "bottom" : "right"}
-                      align={isMobile ? "end" : "start"}
-                    >
-                      <DropdownMenuItem disabled>
-                        <Star className="text-muted-foreground" />
-                        <span>Add To Favorites</span>
-                      </DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem
-                        onClick={() => {
-                          navigator.clipboard.writeText(
-                            `${window.location.origin}/chat/${item.id}`,
-                          );
-                        }}
-                      >
-                        <LinkIcon className="text-muted-foreground" />
-                        <span>Copy Link</span>
-                      </DropdownMenuItem>
-
-                      <Link
-                        href={`/chat/${item.id}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        <DropdownMenuItem>
-                          <ArrowUpRight className="text-muted-foreground" />
-                          <span>Open in New Tab</span>
-                        </DropdownMenuItem>
-                      </Link>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem disabled>
-                        <Trash2 className="text-muted-foreground" />
-                        <span>Delete</span>
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </SidebarMenuItem>
-              ))}
+              <SidebarMenuItem>
+                <SidebarMenuButton isActive asChild>
+                  <Link
+                    href={`/chat/${currentThread.id}`}
+                    title={currentThread.title}
+                  >
+                    <span>{currentThread.title || "New Chat"}</span>
+                  </Link>
+                </SidebarMenuButton>
+                <ThreadDropdown item={currentThread} />
+              </SidebarMenuItem>
             </SidebarMenu>
-          </div>
-        );
-      })}
+          </>
+        )
+      )} */}
+
+      {isLoading ? (
+        <div className="mt-6 flex flex-col gap-2.5 px-2.5">
+          <Skeleton className="h-3 w-[30%] mb-3" />
+          <Skeleton className="h-4 w-[90%]" />
+          <Skeleton className="h-4 w-[80%]" />
+          <Skeleton className="h-4 w-[70%]" />
+          <Skeleton className="h-4 w-[90%]" />
+          <Skeleton className="h-4 w-[60%]" />
+          <Skeleton className="h-4 w-[90%]" />
+        </div>
+      ) : (
+        Object.entries(groupedThreads).map(([group, items]) => {
+          if (items.length === 0) return null;
+          return (
+            <div key={group}>
+              <SidebarGroupLabel className="mt-2">
+                {group === "today"
+                  ? "Today"
+                  : group === "yesterday"
+                    ? "Yesterday"
+                    : "Older"}
+              </SidebarGroupLabel>
+              <SidebarMenu>
+                <AnimatePresence>
+                  {items.map((item) => {
+                    const isActive = pathname === `/chat/${item.id}`;
+                    return (
+                      <SidebarMenuItem key={item.id}>
+                        <SidebarMenuButton isActive={isActive} asChild>
+                          <Link href={`/chat/${item.id}`} title={item.title}>
+                            <span>{item.title || "New Chat"}</span>
+                          </Link>
+                        </SidebarMenuButton>
+                        <ThreadDropdown item={item} />
+                      </SidebarMenuItem>
+                    );
+                  })}
+                </AnimatePresence>
+              </SidebarMenu>
+            </div>
+          );
+        })
+      )}
+
       {hasNextPage && (
         <SidebarMenuItem className="list-none mt-2">
           <SidebarMenuButton
@@ -175,3 +185,55 @@ export function NavThreads({
     </SidebarGroup>
   );
 }
+
+const ThreadDropdown = ({ item }: { item: Thread }) => {
+  const { isMobile } = useSidebar();
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <SidebarMenuAction showOnHover>
+          <MoreHorizontal />
+          <span className="sr-only">More</span>
+        </SidebarMenuAction>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent
+        className="w-56 rounded-lg"
+        side={isMobile ? "bottom" : "right"}
+        align={isMobile ? "end" : "start"}
+      >
+        <DropdownMenuItem disabled>
+          <Star className="text-muted-foreground" />
+          <span>Add To Favorites</span>
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem
+          onClick={() => {
+            navigator.clipboard.writeText(
+              `${window.location.origin}/chat/${item.id}`,
+            );
+          }}
+        >
+          <LinkIcon className="text-muted-foreground" />
+          <span>Copy Link</span>
+        </DropdownMenuItem>
+
+        <Link
+          href={`/chat/${item.id}`}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <DropdownMenuItem>
+            <ArrowUpRight className="text-muted-foreground" />
+            <span>Open in New Tab</span>
+          </DropdownMenuItem>
+        </Link>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem disabled>
+          <Trash2 className="text-muted-foreground" />
+          <span>Delete</span>
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+};

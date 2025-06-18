@@ -4,12 +4,12 @@ import { redirect } from "next/navigation";
 import ChatContext from "@/context/Chat";
 import ChatScreen from "@/components/ChatScreen";
 import ChatInput from "@/components/ChatInput";
-import { getThread } from "@/services/actions";
+import { getThreadMessages } from "@/services/actions";
 import Toolbox from "@/components/Toolbox";
 
 type Params = { params: Promise<{ id: string }> };
 
-const loadThreadData = cache(getThread);
+const loadThreadData = cache(getThreadMessages);
 export async function generateMetadata({ params }: Params) {
   const { id } = await params;
   const thread = await loadThreadData(id);

@@ -1,10 +1,11 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import React from "react";
+import React, { useEffect } from "react";
 import Markdown from "react-markdown";
 import { rehypeInlineCodeProperty } from "react-shiki";
 import remarkGfm from "remark-gfm";
+import { usePathname } from "next/navigation";
 
 import CodeHighlight from "./CodeHighlight";
 import { useChatContext } from "@/context/Chat";
@@ -18,7 +19,16 @@ type Props = {
 };
 
 const ChatScreen = ({ suggestions, userName }: Props) => {
-  const { messages, status } = useChatContext();
+  const { messages, status, setIsNewChat, setMessages } = useChatContext();
+  const pathName = usePathname();
+
+  useEffect(() => {
+    if (pathName == "/") {
+      setIsNewChat?.(true);
+      setMessages?.([]);
+    }
+    return () => {};
+  }, [pathName]);
 
   return (
     <div

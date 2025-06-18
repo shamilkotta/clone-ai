@@ -3,6 +3,7 @@
 import { google } from "@ai-sdk/google";
 import { currentUser, User } from "@clerk/nextjs/server";
 import { generateText } from "ai";
+import { z } from "zod";
 
 import { Message, prisma, Thread } from "@repo/db";
 
@@ -22,7 +23,7 @@ export const getAllThread = async (user: User) => {
 interface ThreadMessage extends Thread {
   messages: Message[];
 }
-export const getThread = async (
+export const getThreadMessages = async (
   threadId: string,
 ): Promise<ThreadMessage | null> => {
   try {
@@ -39,6 +40,31 @@ export const getThread = async (
             createdAt: "asc",
           },
         },
+      },
+    });
+
+    return thread;
+  } catch {
+    return null;
+  }
+};
+
+export const getThread = async (threadId?: string) => {
+  try {
+    if (!threadId) return null;
+    const res = z
+      .string()
+      .trim()
+      .uuid()
+      .or(z.string().trim().cuid())
+      .safeParse(threadId);
+    if (!res.success) return null;
+    const user = await currentUser();
+    if (!user) return null;
+    const thread = await prisma.thread.findFirst({
+      where: {
+        id: threadId,
+        authorId: user.id,
       },
     });
 

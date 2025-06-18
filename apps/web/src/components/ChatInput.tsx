@@ -45,12 +45,13 @@ const ChatInput = ({ animate }: { animate?: boolean }) => {
     stop,
     messages,
     threadId,
+    setTempId,
     currentModel,
   } = useChatContext();
   const { isSignedIn } = useAuth();
   const isMobile = useIsMobile();
   const pathName = usePathname();
-  const { setOpen, setOpenMobile } = useSidebar();
+  const { setOpen, setOpenMobile, setThreadId } = useSidebar();
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
@@ -74,6 +75,8 @@ const ChatInput = ({ animate }: { animate?: boolean }) => {
     let id = threadId;
     if (isSignedIn && !id) {
       id = uuid();
+      setTempId?.(id);
+      setThreadId(id);
       window.history.pushState({}, "", "/chat/" + id);
     }
     handleSubmit?.(
@@ -243,7 +246,7 @@ const ChatInput = ({ animate }: { animate?: boolean }) => {
             }
             whileHover={{ scale: 1.01 }}
             whileTap={{ scale: 0.98 }}
-            disabled={!input?.trim()}
+            disabled={!input?.trim() && status != "streaming"}
             className={cn(
               "px-3 py-3 rounded-lg cursor-pointer disabled:cursor-not-allowed text-sm font-medium transition-all",
               "flex items-center gap-2",

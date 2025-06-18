@@ -5,7 +5,7 @@ import { prisma } from "@repo/db";
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const page = parseInt(searchParams.get("page") || "0", 10);
-  const pageSize = 15;
+  const pageSize = parseInt(searchParams.get("size") || "15", 10);
 
   try {
     const threads = await prisma.thread.findMany({

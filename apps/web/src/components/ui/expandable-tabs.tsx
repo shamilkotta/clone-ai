@@ -4,6 +4,7 @@ import * as React from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { LucideIcon } from "lucide-react";
+import { Button } from "./button";
 
 interface Tab {
   title?: string;
@@ -107,7 +108,14 @@ export function ExpandableTabs({ tabs, className }: ExpandableTabsProps) {
                   transition={transition}
                   className="overflow-hidden"
                 >
-                  {tab.title}
+                  {tab.title == "⌘K" ? (
+                    <div className="flex items-center">
+                      <span className="mr-0.5">{tab.title[0]}</span>
+                      <span>{tab.title[1]}</span>
+                    </div>
+                  ) : (
+                    tab.title
+                  )}
                 </motion.span>
               )}
             </AnimatePresence>

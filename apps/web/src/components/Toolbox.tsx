@@ -1,20 +1,26 @@
 "use client";
 
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import { PlusIcon as Plus, LogIn, Sidebar, Search } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 
 import { ExpandableTabs, TabItem } from "./ui/expandable-tabs";
 import { useSidebar } from "./ui/sidebar";
 import { useChatContext } from "@/context/Chat";
+import SeachDialog from "./Search";
 
 const Toolbox = ({ isLoggedIn }: { isLoggedIn: boolean }) => {
   const { toggleSidebar } = useSidebar();
-  const { setMessages } = useChatContext();
+  const { setMessages, setIsNewChat } = useChatContext();
   const router = useRouter();
+  const pathname = usePathname();
+  const [openSearch, setOpenSearch] = useState(false);
 
   const newChat = () => {
-    setMessages?.([]);
+    if (pathname === "/") {
+      setMessages?.([]);
+    }
+    setIsNewChat?.(true);
     router.push("/");
   };
 
@@ -22,7 +28,7 @@ const Toolbox = ({ isLoggedIn }: { isLoggedIn: boolean }) => {
     if (isLoggedIn) {
       return [
         { icon: Sidebar, onClick: toggleSidebar },
-        { title: "⌘K", icon: Search },
+        { title: "⌘K", icon: Search, onClick: () => setOpenSearch(true) },
         { type: "separator" },
         {
           title: "New",
@@ -50,9 +56,14 @@ const Toolbox = ({ isLoggedIn }: { isLoggedIn: boolean }) => {
         onClick: newChat,
       },
     ];
-  }, [isLoggedIn, toggleSidebar, setMessages]);
+  }, [isLoggedIn, toggleSidebar, setMessages, pathname]);
 
-  return <ExpandableTabs tabs={tabs} className="fixed top-4 left-4 z-10" />;
+  return (
+    <>
+      <ExpandableTabs tabs={tabs} className="fixed top-4 left-4 z-10" />
+      <SeachDialog open={openSearch} setOpen={setOpenSearch} />
+    </>
+  );
 };
 
 export default Toolbox;
