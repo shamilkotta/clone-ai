@@ -6,6 +6,7 @@ import { generateText } from "ai";
 import { z } from "zod";
 
 import { Message, prisma, Thread } from "@repo/db";
+import { revalidatePath } from "next/cache";
 
 export const getAllThread = async (user: User) => {
   const threads = await prisma.thread.findMany({
@@ -104,4 +105,8 @@ export const getQuerySuggestions = async () => {
   } catch {
     return {};
   }
+};
+
+export const revalidateIndex = async () => {
+  revalidatePath("/");
 };

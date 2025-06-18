@@ -39,7 +39,7 @@ const ChatContext = ({ children, thread }: PropsWithChildren<Props>) => {
   const newId = uuid();
   const [isNewChat, setIsNewChat] = useState(Boolean(!thread?.id));
   const [tempId, setTempId] = useState<string>(thread?.id || newId);
-  const { setCThread } = useSidebar();
+  const { setCThread, setIsCurrentLoading } = useSidebar();
   const { isSignedIn } = useAuth();
 
   const onFinish = useCallback(() => {
@@ -54,6 +54,7 @@ const ChatContext = ({ children, thread }: PropsWithChildren<Props>) => {
         })
         .then((threadData) => {
           setCThread(threadData);
+          setIsCurrentLoading(false);
           queryClient.setQueryData<InfiniteData<Thread[]>>(
             ["threads"],
             (oldData) => {
@@ -119,6 +120,7 @@ const ChatContext = ({ children, thread }: PropsWithChildren<Props>) => {
   const submitHandler = () => {
     if (isSignedIn && isNewChat) {
       window.history.pushState({}, "", "/chat/" + tempId);
+      setIsCurrentLoading(true);
     }
 
     chatprops.handleSubmit(

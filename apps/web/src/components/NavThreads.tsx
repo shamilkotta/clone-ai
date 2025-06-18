@@ -1,19 +1,23 @@
 "use client";
 
 import { useMemo } from "react";
-import { useInfiniteQuery } from "@tanstack/react-query";
+import {
+  useInfiniteQuery,
+  useMutation,
+  useQueryClient,
+} from "@tanstack/react-query";
 import {
   ArrowUpRight,
-  Link as LinkIcon,
   MoreHorizontal,
   Trash2,
   LoaderCircle,
   Star,
+  ShareIcon,
 } from "lucide-react";
 import Link from "next/link";
 import { isToday, isYesterday } from "date-fns";
 import { AnimatePresence } from "framer-motion";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 
 import {
   DropdownMenu,
@@ -31,9 +35,10 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { getAllThreads, getThread } from "@/services/api";
+import { deleteThread, getAllThreads, getThread } from "@/services/api";
 import { Thread } from "@repo/db";
 import { Skeleton } from "@/components/ui/skeleton";
+import { revalidateIndex } from "@/services/actions";
 
 export function NavThreads() {
   const pathname = usePathname();
@@ -87,7 +92,7 @@ export function NavThreads() {
       <>
         <SidebarGroupLabel className="mt-2">Current</SidebarGroupLabel>
         <SidebarMenu>
-          <SidebarMenuItem>
+          <SidebarMenuItem suppressHydrationWarning>
             {cThread ? (
               <>
                 <SidebarMenuButton isActive asChild>
@@ -104,11 +109,14 @@ export function NavThreads() {
                 <ThreadDropdown item={cThread} />
               </>
             ) : (
-              <SidebarMenuButton isActive asChild>
-                <Link suppressHydrationWarning href="/" title="New Chat">
-                  <span suppressHydrationWarning>New Chat</span>
-                </Link>
-              </SidebarMenuButton>
+              <>
+                <SidebarMenuButton isActive asChild>
+                  <Link suppressHydrationWarning href="/" title="New Chat">
+                    <span suppressHydrationWarning>New Chat</span>
+                  </Link>
+                </SidebarMenuButton>
+                <EmptyThreadDropdown />
+              </>
             )}
           </SidebarMenuItem>
         </SidebarMenu>
@@ -178,15 +186,64 @@ export function NavThreads() {
   );
 }
 
+const EmptyThreadDropdown = () => {
+  const { isCurrentLoading } = useSidebar();
+
+  if (isCurrentLoading)
+    return (
+      <SidebarMenuAction>
+        <LoaderCircle size={18} className="animate-[spin_2s_linear_infinite]" />
+      </SidebarMenuAction>
+    );
+
+  return null;
+};
+
 const ThreadDropdown = ({ item }: { item: Thread }) => {
   const { isMobile } = useSidebar();
+  const queryClient = useQueryClient();
+  const router = useRouter();
+  const { setIsCurrentLoading, isCurrentLoading, cThread, setCThread } =
+    useSidebar();
+
+  const { mutate, isPending } = useMutation({
+    mutationFn: deleteThread,
+    onSuccess: (_, threadId) => {
+      queryClient.invalidateQueries({
+        queryKey: ["threads"],
+      });
+      setIsCurrentLoading(false);
+      if (cThread?.id == threadId) {
+        setCThread(null);
+        router.push("/");
+        revalidateIndex();
+      }
+    },
+  });
+  const isLoading = isPending || (isCurrentLoading && item.id === cThread?.id);
+
+  const handleDelete = () => {
+    if (item.id === cThread?.id) {
+      setIsCurrentLoading(true);
+    }
+    mutate(item.id);
+  };
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <SidebarMenuAction showOnHover>
-          <MoreHorizontal />
-          <span className="sr-only">More</span>
+      <DropdownMenuTrigger disabled={isLoading} asChild>
+        <SidebarMenuAction showOnHover={!isLoading}>
+          {isLoading ? (
+            <LoaderCircle
+              size={18}
+              className="animate-[spin_2s_linear_infinite]"
+            />
+          ) : (
+            <>
+              <MoreHorizontal />
+              <span className="sr-only">More</span>
+            </>
+          )}
         </SidebarMenuAction>
       </DropdownMenuTrigger>
       <DropdownMenuContent
@@ -199,15 +256,9 @@ const ThreadDropdown = ({ item }: { item: Thread }) => {
           <span>Add To Favorites</span>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem
-          onClick={() => {
-            navigator.clipboard.writeText(
-              `${window.location.origin}/chat/${item.id}`,
-            );
-          }}
-        >
-          <LinkIcon className="text-muted-foreground" />
-          <span>Copy Link</span>
+        <DropdownMenuItem disabled>
+          <ShareIcon className="text-muted-foreground" />
+          <span>Share</span>
         </DropdownMenuItem>
 
         <Link
@@ -221,7 +272,7 @@ const ThreadDropdown = ({ item }: { item: Thread }) => {
           </DropdownMenuItem>
         </Link>
         <DropdownMenuSeparator />
-        <DropdownMenuItem disabled>
+        <DropdownMenuItem onClick={handleDelete}>
           <Trash2 className="text-muted-foreground" />
           <span>Delete</span>
         </DropdownMenuItem>

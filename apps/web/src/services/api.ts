@@ -70,3 +70,17 @@ export const deleteUserModel = async (id: string) => {
     throw new Error("Failed to delete model");
   }
 };
+
+export const deleteThread = async (id: string) => {
+  const response = await fetch(`/api/threads`, {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ id }),
+  });
+  if (!response.ok) {
+    throw new Error("Failed to delete thread");
+  }
+  return response.json();
+};

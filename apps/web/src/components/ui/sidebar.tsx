@@ -44,6 +44,8 @@ type SidebarContextProps = {
   toggleSidebar: () => void;
   cThread: Thread | null;
   setCThread: (threadId: Thread | null) => void;
+  isCurrentLoading: boolean;
+  setIsCurrentLoading: (loading: boolean) => void;
 };
 
 const SidebarContext = React.createContext<SidebarContextProps | null>(null);
@@ -75,6 +77,7 @@ function SidebarProvider({
   const params = useParams();
   const pathname = usePathname();
   const [cThread, setCThread] = React.useState<Thread | null>(null);
+  const [isCurrentLoading, setIsCurrentLoading] = React.useState(false);
 
   // This is the internal state of the sidebar.
   // We use openProp and setOpenProp for control from outside the component.
@@ -131,6 +134,8 @@ function SidebarProvider({
       toggleSidebar,
       setCThread,
       cThread,
+      isCurrentLoading,
+      setIsCurrentLoading,
     }),
     [
       state,
@@ -142,6 +147,8 @@ function SidebarProvider({
       toggleSidebar,
       setCThread,
       cThread,
+      isCurrentLoading,
+      setIsCurrentLoading,
     ],
   );
 

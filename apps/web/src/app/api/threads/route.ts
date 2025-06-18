@@ -29,3 +29,36 @@ export async function GET(request: Request) {
     return Response.json({ error: "Failed to fetch threads" }, { status: 500 });
   }
 }
+
+export async function DELETE(request: Request) {
+  try {
+    const user = await currentUser();
+    if (!user) return Response.json({ error: "Unauthorized" }, { status: 401 });
+
+    const { id } = await request.json();
+
+    if (!id) {
+      return Response.json({ error: "Thread ID is required" }, { status: 400 });
+    }
+
+    const thread = await prisma.thread.findUnique({
+      where: { id: id, authorId: user.id },
+    });
+
+    if (!thread) {
+      return Response.json(
+        { error: "Thread not found or unauthorized" },
+        { status: 404 },
+      );
+    }
+
+    await prisma.thread.delete({
+      where: { id: thread.id },
+    });
+
+    return Response.json({ message: "Thread deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting thread:", error);
+    return Response.json({ error: "Failed to delete thread" }, { status: 500 });
+  }
+}
