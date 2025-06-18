@@ -35,10 +35,9 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { deleteThread, getAllThreads, getThread } from "@/services/api";
+import { deleteThread, getAllThreads } from "@/services/api";
 import { Thread } from "@repo/db";
 import { Skeleton } from "@/components/ui/skeleton";
-import { revalidateIndex } from "@/services/actions";
 
 export function NavThreads() {
   const pathname = usePathname();

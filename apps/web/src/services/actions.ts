@@ -106,7 +106,3 @@ export const getQuerySuggestions = async () => {
     return {};
   }
 };
-
-export const revalidateIndex = async () => {
-  revalidatePath("/");
-};
