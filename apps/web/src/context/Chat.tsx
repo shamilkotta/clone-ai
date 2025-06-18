@@ -27,7 +27,6 @@ interface ChatContextType extends UseChatHelpers {
   currentModel: SelectedModel;
   setCurrentModel: (model: SelectedModel) => void;
   submitHandler: () => void;
-  setIsNewChat?: (isNew: boolean) => void;
   defaltModel: SelectedModel;
   setModalAsDefault: (model: SelectedModel) => void;
 }
@@ -37,9 +36,9 @@ export const useChatContext = () => React.use(Chat);
 const ChatContext = ({ children, thread }: PropsWithChildren<Props>) => {
   const queryClient = useQueryClient();
   const newId = uuid();
-  const [isNewChat, setIsNewChat] = useState(Boolean(!thread?.id));
   const [tempId, setTempId] = useState<string>(thread?.id || newId);
-  const { setCThread, setIsCurrentLoading } = useSidebar();
+  const { setCThread, setIsCurrentLoading, isNewChat, setIsNewChat } =
+    useSidebar();
   const { isSignedIn } = useAuth();
 
   const onFinish = useCallback(() => {
@@ -103,6 +102,7 @@ const ChatContext = ({ children, thread }: PropsWithChildren<Props>) => {
 
   useEffect(() => {
     setCThread(thread || null);
+    setIsNewChat(Boolean(!thread?.id));
 
     return () => {};
   }, [thread]);
@@ -137,14 +137,19 @@ const ChatContext = ({ children, thread }: PropsWithChildren<Props>) => {
     );
   };
 
+  const handleStop = () => {
+    chatprops.stop();
+    onFinish();
+  };
+
   return (
     <Chat.Provider
       value={{
         ...chatprops,
+        stop: handleStop,
         currentModel,
         setCurrentModel,
         submitHandler,
-        setIsNewChat,
         defaltModel,
         setModalAsDefault,
       }}

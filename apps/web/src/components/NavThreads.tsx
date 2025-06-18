@@ -203,23 +203,28 @@ const ThreadDropdown = ({ item }: { item: Thread }) => {
   const { isMobile } = useSidebar();
   const queryClient = useQueryClient();
   const router = useRouter();
-  const { setIsCurrentLoading, isCurrentLoading, cThread, setCThread } =
-    useSidebar();
+  const {
+    setIsCurrentLoading,
+    isCurrentLoading,
+    cThread,
+    setCThread,
+    setIsNewChat,
+  } = useSidebar();
 
-  const { mutate, isPending } = useMutation({
-    mutationFn: deleteThread,
-    onSuccess: (_, threadId) => {
-      queryClient.invalidateQueries({
-        queryKey: ["threads"],
-      });
-      setIsCurrentLoading(false);
-      if (cThread?.id == threadId) {
-        setCThread(null);
-        router.push("/");
-        revalidateIndex();
-      }
-    },
-  });
+    const { mutate, isPending } = useMutation({
+      mutationFn: deleteThread,
+      onSuccess: (_, threadId) => {
+        queryClient.invalidateQueries({
+          queryKey: ["threads"],
+        });
+        setIsCurrentLoading(false);
+        if (cThread?.id == threadId) {
+          setCThread(null);
+          setIsNewChat(true);
+          router.push("/");
+        }
+      },
+    });
   const isLoading = isPending || (isCurrentLoading && item.id === cThread?.id);
 
   const handleDelete = () => {

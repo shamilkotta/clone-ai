@@ -10,8 +10,8 @@ import { useChatContext } from "@/context/Chat";
 import SeachDialog from "./Search";
 
 const Toolbox = ({ isLoggedIn }: { isLoggedIn: boolean }) => {
-  const { toggleSidebar } = useSidebar();
-  const { setMessages, setIsNewChat } = useChatContext();
+  const { toggleSidebar, setIsNewChat } = useSidebar();
+  const { setMessages } = useChatContext();
   const router = useRouter();
   const pathname = usePathname();
   const [openSearch, setOpenSearch] = useState(false);

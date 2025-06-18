@@ -4,7 +4,6 @@ import * as React from "react";
 import { Slot } from "@radix-ui/react-slot";
 import { cva, VariantProps } from "class-variance-authority";
 import { AlignLeft } from "lucide-react";
-import { useParams, usePathname } from "next/navigation";
 
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
@@ -46,6 +45,8 @@ type SidebarContextProps = {
   setCThread: (threadId: Thread | null) => void;
   isCurrentLoading: boolean;
   setIsCurrentLoading: (loading: boolean) => void;
+  isNewChat: boolean;
+  setIsNewChat: (isNewChat: boolean) => void;
 };
 
 const SidebarContext = React.createContext<SidebarContextProps | null>(null);
@@ -74,10 +75,9 @@ function SidebarProvider({
 }) {
   const isMobile = useIsMobile();
   const [openMobile, setOpenMobile] = React.useState(false);
-  const params = useParams();
-  const pathname = usePathname();
   const [cThread, setCThread] = React.useState<Thread | null>(null);
   const [isCurrentLoading, setIsCurrentLoading] = React.useState(false);
+  const [isNewChat, setIsNewChat] = React.useState(false);
 
   // This is the internal state of the sidebar.
   // We use openProp and setOpenProp for control from outside the component.
@@ -136,6 +136,8 @@ function SidebarProvider({
       cThread,
       isCurrentLoading,
       setIsCurrentLoading,
+      isNewChat,
+      setIsNewChat,
     }),
     [
       state,
@@ -149,6 +151,8 @@ function SidebarProvider({
       cThread,
       isCurrentLoading,
       setIsCurrentLoading,
+      isNewChat,
+      setIsNewChat,
     ],
   );
 
