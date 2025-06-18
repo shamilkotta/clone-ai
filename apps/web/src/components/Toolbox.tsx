@@ -6,12 +6,15 @@ import { useRouter } from "next/navigation";
 
 import { ExpandableTabs, TabItem } from "./ui/expandable-tabs";
 import { useSidebar } from "./ui/sidebar";
+import { useChatContext } from "@/context/Chat";
 
 const Toolbox = ({ isLoggedIn }: { isLoggedIn: boolean }) => {
   const { toggleSidebar } = useSidebar();
+  const { setMessages } = useChatContext();
   const router = useRouter();
 
   const newChat = () => {
+    setMessages?.([]);
     router.push("/");
   };
 
@@ -47,7 +50,7 @@ const Toolbox = ({ isLoggedIn }: { isLoggedIn: boolean }) => {
         onClick: newChat,
       },
     ];
-  }, [isLoggedIn, toggleSidebar]);
+  }, [isLoggedIn, toggleSidebar, setMessages]);
 
   return <ExpandableTabs tabs={tabs} className="fixed top-4 left-4 z-10" />;
 };
