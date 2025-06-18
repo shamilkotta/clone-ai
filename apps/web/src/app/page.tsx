@@ -1,6 +1,6 @@
 import React from "react";
 
-import ChatInput from "@/components/ui/chat-input";
+import ChatInput from "@/components/ChatInput";
 import ChatContext from "@/context/Chat";
 import ChatScreen from "@/components/ChatScreen";
 import Bg from "@/components/Bg";

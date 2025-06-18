@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 
 import ChatContext from "@/context/Chat";
 import ChatScreen from "@/components/ChatScreen";
-import ChatInput from "@/components/ui/chat-input";
+import ChatInput from "@/components/ChatInput";
 import { getThread } from "@/services/actions";
 import Toolbox from "@/components/Toolbox";
 

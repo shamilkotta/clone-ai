@@ -15,7 +15,7 @@ import { useAuth } from "@clerk/nextjs";
 
 import useAutoResizeTextarea from "@/hooks/use-auto-resize";
 import { cn } from "@/lib/utils";
-import Textarea from "./textarea";
+import Textarea from "./ui/textarea";
 import { useChatContext } from "@/context/Chat";
 import {
   DropdownMenu,
@@ -23,11 +23,11 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "./dropdown-menu";
+} from "./ui/dropdown-menu";
 import { useIsMobile } from "@/hooks/use-mobile";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useSidebar } from "./sidebar";
+import { useSidebar } from "./ui/sidebar";
 
 const ChatInput = ({ animate }: { animate?: boolean }) => {
   const [attachments, setAttachments] = useState<string[]>([]);
@@ -204,8 +204,6 @@ const ChatInput = ({ animate }: { animate?: boolean }) => {
                   whileTap={{ scale: 0.94 }}
                   className={cn(
                     "p-2 cursor-pointer flex items-center gap-1.5 text-neutral-900/40 dark:text-white/40 hover:text-neutral-900/90 dark:hover:text-white/90 rounded-lg transition-colors relative group",
-                    false &&
-                      "bg-neutral-900/10 dark:bg-white/10 text-neutral-900/90 dark:text-white/90",
                     "focus-within:border-0",
                   )}
                 >
